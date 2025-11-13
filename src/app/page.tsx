@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Check, Globe, Shield, Zap, TrendingUp, ChevronRight, Star, User, Lock, Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Search, Check, Globe, Shield, Zap, TrendingUp, ChevronRight, Star, User, Lock, Eye, EyeOff, Settings, Activity, BarChart3 } from "lucide-react";
 
 export default function Home() {
+  const router = useRouter();
   const [domain, setDomain] = useState("");
   const [searchResult, setSearchResult] = useState<{
     available: boolean;
@@ -30,23 +32,47 @@ export default function Home() {
   const features = [
     {
       icon: Shield,
-      title: "Proteção de Privacidade",
-      description: "Mantenha suas informações pessoais protegidas com privacidade de domínio gratuita.",
+      title: "Proteção de Privacidade Aprimorada",
+      description: "Criptografia ponta a ponta, ocultação automática de WHOIS e autenticação em dois fatores. Ative ou ajuste as opções de segurança com apenas um clique.",
+      details: [
+        "Criptografia ponta a ponta",
+        "Ocultação automática de informações públicas (WHOIS)",
+        "Autenticação em dois fatores",
+        "Controle total sobre privacidade"
+      ]
     },
     {
-      icon: Zap,
+      icon: Settings,
       title: "Configuração Instantânea",
-      description: "Configure seu domínio em minutos com nosso painel intuitivo e fácil de usar.",
+      description: "Registre, ajuste e ative serviços sem etapas complexas. O sistema detecta automaticamente as melhores configurações e aplica otimizações em tempo real.",
+      details: [
+        "Detecção automática de configurações",
+        "Otimizações em tempo real",
+        "Sem etapas complexas",
+        "Praticidade e agilidade"
+      ]
     },
     {
       icon: Globe,
-      title: "DNS Gerenciado",
-      description: "Gerenciamento completo de DNS com uptime de 99.9% garantido.",
+      title: "DNS Gerenciado Inteligente",
+      description: "Tecnologia em nuvem com atualização automática. Alterações de DNS em segundos, monitoramento ativo e proteção contra ataques DDoS.",
+      details: [
+        "Alterações de DNS em segundos",
+        "Monitoramento ativo de desempenho",
+        "Proteção contra ataques DDoS",
+        "Uptime de 99.9% garantido"
+      ]
     },
     {
-      icon: TrendingUp,
-      title: "Ferramentas de Marketing",
-      description: "Impulsione seu negócio com ferramentas integradas de SEO e marketing.",
+      icon: BarChart3,
+      title: "Ferramentas de Marketing Integradas",
+      description: "Painel de marketing inteligente com monitoramento de tráfego em tempo real, integração com redes sociais e campanhas personalizadas ativadas com um clique.",
+      details: [
+        "Monitoramento de tráfego e conversão",
+        "Integração com redes sociais",
+        "Geração automática de relatórios",
+        "Campanhas personalizadas"
+      ]
     },
   ];
 
@@ -124,6 +150,10 @@ export default function Home() {
     setLoginForm({ email: "", password: "" });
     setShowPassword(false);
     setRememberMe(false);
+  };
+
+  const handleRegister = () => {
+    router.push("/checkout");
   };
 
   return (
@@ -315,8 +345,11 @@ export default function Home() {
                         <p className="text-3xl font-bold text-gray-900">{searchResult.price}</p>
                         <p className="text-sm text-gray-500">por ano</p>
                       </div>
-                      <button className="px-6 py-3 bg-[#00a82d] text-white rounded-xl hover:bg-[#008c26] transition-colors font-semibold whitespace-nowrap">
-                        Adicionar ao Carrinho
+                      <button 
+                        onClick={handleRegister}
+                        className="px-6 py-3 bg-[#00a82d] text-white rounded-xl hover:bg-[#008c26] transition-colors font-semibold whitespace-nowrap"
+                      >
+                        Registrar
                       </button>
                     </div>
                   </div>
@@ -385,7 +418,10 @@ export default function Home() {
                   <h3 className="text-3xl font-bold text-gray-900 mb-2">{ext.ext}</h3>
                   <p className="text-2xl font-bold text-[#00a82d] mb-4">{ext.price}</p>
                   <p className="text-sm text-gray-500 mb-4">por ano</p>
-                  <button className="w-full px-6 py-3 bg-[#00a82d] text-white rounded-xl hover:bg-[#008c26] transition-colors font-semibold">
+                  <button 
+                    onClick={handleRegister}
+                    className="w-full px-6 py-3 bg-[#00a82d] text-white rounded-xl hover:bg-[#008c26] transition-colors font-semibold"
+                  >
                     Registrar Agora
                   </button>
                 </div>
@@ -398,25 +434,54 @@ export default function Home() {
       {/* Features Section */}
       <section id="recursos" className="py-16 sm:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
               Por Que Escolher a DomainPro?
             </h2>
-            <p className="text-lg text-gray-600">
-              Recursos premium incluídos em todos os planos
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Um painel inteligente e moderno onde cada função pode ser ativada de forma instantânea, de acordo com suas necessidades
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
             {features.map((feature, index) => (
-              <div key={index} className="text-center">
-                <div className="w-16 h-16 bg-[#00a82d]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <feature.icon className="w-8 h-8 text-[#00a82d]" />
+              <div 
+                key={index} 
+                className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all border border-gray-100"
+              >
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="w-14 h-14 bg-[#00a82d]/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <feature.icon className="w-7 h-7 text-[#00a82d]" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">{feature.title}</h3>
+                    <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                  </div>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
+                
+                <ul className="space-y-2 mt-4 pl-[72px]">
+                  {feature.details.map((detail, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                      <Check className="w-4 h-4 text-[#00a82d] flex-shrink-0 mt-0.5" />
+                      <span>{detail}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
+          </div>
+
+          {/* Ativação sob Demanda */}
+          <div className="bg-gradient-to-r from-[#00a82d] to-[#008c26] rounded-2xl p-8 sm:p-12 text-white text-center">
+            <div className="max-w-3xl mx-auto">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Zap className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-bold mb-4">Ativação sob Demanda</h3>
+              <p className="text-lg text-white/90 leading-relaxed">
+                Todas as funções do DomainPro — segurança, DNS, marketing e configurações — podem ser ativadas ou desativadas livremente pelo cliente, sempre que desejar. A proposta é simples: dar poder e flexibilidade total ao usuário, com o máximo de segurança, praticidade e desempenho.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -468,6 +533,7 @@ export default function Home() {
                 </ul>
 
                 <button
+                  onClick={handleRegister}
                   className={`w-full px-6 py-3 rounded-xl font-semibold transition-colors ${
                     plan.highlighted
                       ? "bg-[#00a82d] text-white hover:bg-[#008c26]"
@@ -491,7 +557,10 @@ export default function Home() {
           <p className="text-xl text-white/90 mb-8">
             Registre seu domínio hoje e ganhe 3 meses de email profissional grátis!
           </p>
-          <button className="px-8 py-4 bg-white text-[#00a82d] rounded-xl hover:bg-gray-100 transition-colors font-bold text-lg inline-flex items-center gap-2">
+          <button 
+            onClick={handleRegister}
+            className="px-8 py-4 bg-white text-[#00a82d] rounded-xl hover:bg-gray-100 transition-colors font-bold text-lg inline-flex items-center gap-2"
+          >
             Buscar Meu Domínio
             <ChevronRight className="w-5 h-5" />
           </button>
