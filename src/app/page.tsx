@@ -14,6 +14,7 @@ export default function Home() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const extensions = [
     { ext: ".com", price: "R$ 49,99", popular: true },
@@ -101,7 +102,6 @@ export default function Home() {
 
     setIsSearching(true);
     
-    // Simulação de busca
     setTimeout(() => {
       const isAvailable = Math.random() > 0.3;
       const cleanDomain = domain.toLowerCase().replace(/\s+/g, "");
@@ -118,12 +118,12 @@ export default function Home() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulação de login
-    console.log("Login:", loginForm);
+    console.log("Login:", loginForm, "Lembrar:", rememberMe);
     alert("Login realizado com sucesso!");
     setShowLoginModal(false);
     setLoginForm({ email: "", password: "" });
     setShowPassword(false);
+    setRememberMe(false);
   };
 
   return (
@@ -163,7 +163,10 @@ export default function Home() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
             <button
-              onClick={() => setShowLoginModal(false)}
+              onClick={() => {
+                setShowLoginModal(false);
+                setShowPassword(false);
+              }}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
             >
               ×
@@ -211,6 +214,7 @@ export default function Home() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                   >
                     {showPassword ? (
                       <EyeOff className="w-5 h-5" />
@@ -222,8 +226,13 @@ export default function Home() {
               </div>
 
               <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" className="w-4 h-4 text-[#00a82d] rounded" />
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="w-4 h-4 text-[#00a82d] rounded border-gray-300 focus:ring-[#00a82d]" 
+                  />
                   <span className="text-sm text-gray-600">Lembrar-me</span>
                 </label>
                 <a href="#" className="text-sm text-[#00a82d] hover:text-[#008c26] font-medium">
