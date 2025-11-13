@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Check, Globe, Shield, Zap, TrendingUp, ChevronRight, Star } from "lucide-react";
+import { Search, Check, Globe, Shield, Zap, TrendingUp, ChevronRight, Star, User, Lock, Eye, EyeOff } from "lucide-react";
 
 export default function Home() {
   const [domain, setDomain] = useState("");
@@ -11,6 +11,9 @@ export default function Home() {
     price: string;
   } | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
 
   const extensions = [
     { ext: ".com", price: "R$ 49,99", popular: true },
@@ -113,6 +116,16 @@ export default function Home() {
     }, 1500);
   };
 
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Simulação de login
+    console.log("Login:", loginForm);
+    alert("Login realizado com sucesso!");
+    setShowLoginModal(false);
+    setLoginForm({ email: "", password: "" });
+    setShowPassword(false);
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -133,13 +146,110 @@ export default function Home() {
               <a href="#precos" className="text-gray-700 hover:text-[#00a82d] transition-colors">
                 Preços
               </a>
-              <button className="px-6 py-2 bg-[#00a82d] text-white rounded-lg hover:bg-[#008c26] transition-colors font-medium">
-                Entrar
+              <button 
+                onClick={() => setShowLoginModal(true)}
+                className="px-6 py-2 bg-[#00a82d] text-white rounded-lg hover:bg-[#008c26] transition-colors font-medium flex items-center gap-2"
+              >
+                <User className="w-4 h-4" />
+                Acessar Conta
               </button>
             </nav>
           </div>
         </div>
       </header>
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
+            <button
+              onClick={() => setShowLoginModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
+            >
+              ×
+            </button>
+            
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-[#00a82d]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Lock className="w-8 h-8 text-[#00a82d]" />
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Bem-vindo de volta!</h2>
+              <p className="text-gray-600">Acesse sua conta DomainPro</p>
+            </div>
+
+            <form onSubmit={handleLogin} className="space-y-6">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  value={loginForm.email}
+                  onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00a82d] focus:border-transparent outline-none transition-all"
+                  placeholder="seu@email.com"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                  Senha
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    value={loginForm.password}
+                    onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
+                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00a82d] focus:border-transparent outline-none transition-all"
+                    placeholder="••••••••"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="w-4 h-4 text-[#00a82d] rounded" />
+                  <span className="text-sm text-gray-600">Lembrar-me</span>
+                </label>
+                <a href="#" className="text-sm text-[#00a82d] hover:text-[#008c26] font-medium">
+                  Esqueceu a senha?
+                </a>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full px-6 py-3 bg-[#00a82d] text-white rounded-lg hover:bg-[#008c26] transition-colors font-semibold text-lg"
+              >
+                Entrar
+              </button>
+
+              <div className="text-center">
+                <p className="text-sm text-gray-600">
+                  Não tem uma conta?{" "}
+                  <a href="#" className="text-[#00a82d] hover:text-[#008c26] font-medium">
+                    Criar conta grátis
+                  </a>
+                </p>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white py-16 sm:py-24">
