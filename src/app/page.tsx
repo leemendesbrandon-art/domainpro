@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Check, Globe, Shield, Zap, TrendingUp, ChevronRight, Star, User, Lock, Eye, EyeOff, Settings, Activity, BarChart3 } from "lucide-react";
+import { Search, Check, Globe, Shield, Zap, TrendingUp, ChevronRight, Star, User, Lock, Eye, EyeOff, Settings, Activity, BarChart3, MessageCircle, X, Send, Bot, AlertCircle, CheckCircle, Wrench, RefreshCw, HelpCircle, FileText, Mic, Terminal } from "lucide-react";
 
 export default function Home() {
   const router = useRouter();
@@ -17,6 +17,28 @@ export default function Home() {
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  
+  // ChatBot States
+  const [showChatBot, setShowChatBot] = useState(false);
+  const [chatMessages, setChatMessages] = useState<Array<{
+    type: 'user' | 'bot';
+    message: string;
+    timestamp: Date;
+    actions?: Array<{ label: string; action: string }>;
+  }>([
+    {
+      type: 'bot',
+      message: 'Olá! Sou o assistente inteligente do DomainPro. Como posso ajudá-lo hoje?',
+      timestamp: new Date(),
+      actions: [
+        { label: '🔧 Diagnosticar Problema', action: 'diagnose' },
+        { label: '❓ Perguntas Frequentes', action: 'faq' },
+        { label: '⚙️ Configuração Guiada', action: 'setup' }
+      ]
+    }
+  ]);
+  const [chatInput, setChatInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
 
   const extensions = [
     { ext: ".com", price: "R$ 49,99", popular: true },
@@ -156,6 +178,132 @@ export default function Home() {
     router.push("/checkout");
   };
 
+  // ChatBot Functions
+  const handleChatAction = (action: string) => {
+    setIsTyping(true);
+    
+    setTimeout(() => {
+      let botResponse = "";
+      let actions: Array<{ label: string; action: string }> = [];
+
+      switch (action) {
+        case 'diagnose':
+          botResponse = "🔍 Iniciando diagnóstico automático...\n\n✅ DNS: Funcionando normalmente\n✅ Servidor: Online (99.9% uptime)\n✅ Certificado SSL: Válido\n✅ Pagamentos: Sistema operacional\n\nTudo está funcionando perfeitamente! Posso ajudar com algo específico?";
+          actions = [
+            { label: '🔧 Verificar Domínio', action: 'check_domain' },
+            { label: '💳 Status de Pagamento', action: 'payment_status' },
+            { label: '🌐 Testar DNS', action: 'test_dns' }
+          ];
+          break;
+        case 'faq':
+          botResponse = "📚 Perguntas Frequentes:\n\n1️⃣ Como recuperar minha senha?\n2️⃣ Por que meu domínio não está abrindo?\n3️⃣ Como ativar ferramentas de marketing?\n4️⃣ Meu pagamento não processou, e agora?\n5️⃣ Como configurar meu cartão?\n\nDigite o número da pergunta ou descreva seu problema.";
+          break;
+        case 'setup':
+          botResponse = "🛠️ Soluções Automáticas do DomainPro\n\nO ChatBot está pronto para ajudar você a resolver problemas rapidamente e manter seu projeto funcionando sem travar. Aqui estão as funções automáticas que ele pode ativar quando detectar algum erro:\n\n📣 1. SOLUÇÕES DE MARKETING\n• Ajustes de SEO básico no domínio\n• Atualização automática de meta tags e descrições\n• Correção de links quebrados em campanhas\n• Verificação de redirecionamentos de páginas\n• Otimização de velocidade para melhorar o ranqueamento\n• Sugerir melhorias para páginas que não estão recebendo visitas\n• Recomendar palavras-chave com base no seu nicho\n\n🌐 2. CONFIGURAÇÕES DNS\n• Verificação do DNS do domínio\n• Correção de registros A, CNAME, MX ou TXT mal configurados\n• Teste de propagação DNS em tempo real\n• Detecção de conflitos entre provedores\n• Ajuste automático do apontamento da hospedagem\n• Reparação de falha de e-mail causada por erro de DNS\n• Notificação quando o domínio estiver quase expirando\n\n🔐 3. SEGURANÇA DO SISTEMA\n• Verificar automaticamente o certificado SSL\n• Renovar o HTTPS quando estiver perto de expirar\n• Bloquear tentativas suspeitas de login\n• Corrigir permissões inseguras no servidor\n• Detectar arquivos maliciosos e sugerir remoção\n• Ativar modo de proteção contra bots e ataques DDoS\n• Verificar se o app está seguindo padrões básicos de segurança\n\n🤖 Como o Bot trabalha\nSempre que uma dessas áreas apresentar erro ou risco, o ChatBot irá:\n1. Detectar o problema\n2. Informar você\n3. Corrigir automaticamente (quando permitido)\n4. Registrar tudo no histórico de manutenção";
+          actions = [
+            { label: '🌐 Configurar DNS', action: 'setup_dns' },
+            { label: '📈 Ativar Marketing', action: 'setup_marketing' },
+            { label: '🔒 Configurar Segurança', action: 'setup_security' }
+          ];
+          break;
+        case 'check_domain':
+          botResponse = "🌐 Verificando status do domínio...\n\n✅ Domínio: Ativo\n✅ Expiração: 15/12/2025\n✅ DNS: Configurado corretamente\n✅ SSL: Ativo e válido\n\nSeu domínio está funcionando perfeitamente!";
+          break;
+        case 'payment_status':
+          botResponse = "💳 Status de Pagamentos:\n\n✅ Último pagamento: 15/01/2024 - Aprovado\n📅 Próximo vencimento: 15/01/2025\n💰 Valor: R$ 89,99/ano\n\nTodos os pagamentos estão em dia!";
+          break;
+        case 'test_dns':
+          botResponse = "🌐 Testando configurações de DNS...\n\n✅ Servidor primário: Respondendo (12ms)\n✅ Servidor secundário: Respondendo (15ms)\n✅ Propagação: 100% completa\n✅ DNSSEC: Ativo\n\nSeu DNS está otimizado e funcionando perfeitamente!";
+          break;
+        case 'setup_dns':
+          botResponse = "🌐 Configuração de DNS\n\nVou configurar seu DNS automaticamente com as melhores práticas:\n\n1. Aplicando configurações otimizadas...\n2. Ativando proteção DDoS...\n3. Configurando cache inteligente...\n\n✅ DNS configurado com sucesso!\n\nSuas alterações estarão ativas em até 5 minutos.";
+          break;
+        case 'setup_marketing':
+          botResponse = "📈 Ferramentas de Marketing\n\nAtivando painel de marketing inteligente:\n\n✅ Monitoramento de tráfego: Ativo\n✅ Integração com redes sociais: Configurada\n✅ Relatórios automáticos: Ativados\n✅ Campanhas personalizadas: Prontas\n\nSuas ferramentas de marketing estão ativas!";
+          break;
+        case 'setup_security':
+          botResponse = "🔒 Configuração de Segurança\n\nAplicando configurações de segurança avançadas:\n\n✅ Criptografia ponta a ponta: Ativa\n✅ Autenticação em dois fatores: Configurada\n✅ Proteção WHOIS: Ativa\n✅ Firewall: Ativo\n\nSua conta está totalmente protegida!";
+          break;
+        case 'human_support':
+          botResponse = "👤 Encaminhando para Suporte Humano\n\n📋 Ticket #" + Math.floor(Math.random() * 10000) + " criado\n⏱️ Tempo estimado de resposta: 5-10 minutos\n\nUm de nossos especialistas entrará em contato em breve. Você receberá uma notificação quando o atendente estiver disponível.";
+          break;
+        default:
+          botResponse = "Entendi! Como posso ajudá-lo com isso?";
+      }
+
+      setChatMessages(prev => [...prev, {
+        type: 'bot',
+        message: botResponse,
+        timestamp: new Date(),
+        actions: actions.length > 0 ? actions : undefined
+      }]);
+      setIsTyping(false);
+    }, 1500);
+  };
+
+  const handleSendMessage = () => {
+    if (!chatInput.trim()) return;
+
+    const userMessage = chatInput;
+    setChatMessages(prev => [...prev, {
+      type: 'user',
+      message: userMessage,
+      timestamp: new Date()
+    }]);
+    setChatInput("");
+    setIsTyping(true);
+
+    // Simular resposta inteligente do bot
+    setTimeout(() => {
+      let botResponse = "";
+      let actions: Array<{ label: string; action: string }> = [];
+
+      const lowerMessage = userMessage.toLowerCase();
+
+      if (lowerMessage.includes('senha') || lowerMessage.includes('login')) {
+        botResponse = "🔐 Problemas com senha?\n\nVocê pode recuperar sua senha facilmente:\n1. Clique em 'Esqueceu a senha?' na tela de login\n2. Insira seu email cadastrado\n3. Você receberá um código de verificação\n4. Defina uma nova senha segura\n\nPosso ajudar com mais alguma coisa?";
+      } else if (lowerMessage.includes('dominio') || lowerMessage.includes('dns')) {
+        botResponse = "🌐 Detectei uma consulta sobre domínio/DNS.\n\nQuer que eu execute um diagnóstico completo do seu domínio agora?";
+        actions = [
+          { label: '✅ Sim, diagnosticar', action: 'check_domain' },
+          { label: '🔧 Reconfigurar DNS', action: 'setup_dns' }
+        ];
+      } else if (lowerMessage.includes('pagamento') || lowerMessage.includes('pix') || lowerMessage.includes('cartao')) {
+        botResponse = "💳 Problemas com pagamento?\n\nPosso ajudar com:\n• Verificar status de pagamento\n• Regenerar QR Code do Pix\n• Atualizar dados do cartão\n• Consultar histórico de pagamentos\n\nO que você precisa?";
+        actions = [
+          { label: '📊 Ver Status', action: 'payment_status' },
+          { label: '🔄 Regenerar Pix', action: 'regenerate_pix' }
+        ];
+      } else if (lowerMessage.includes('erro') || lowerMessage.includes('problema') || lowerMessage.includes('bug')) {
+        botResponse = "⚠️ Detectei um problema!\n\nVou executar um diagnóstico automático para identificar e corrigir o erro.";
+        actions = [
+          { label: '🔍 Diagnosticar Agora', action: 'diagnose' },
+          { label: '👤 Falar com Humano', action: 'human_support' }
+        ];
+      } else if (lowerMessage.includes('marketing') || lowerMessage.includes('campanha')) {
+        botResponse = "📈 Ferramentas de Marketing\n\nPosso ajudá-lo a:\n• Ativar painel de marketing\n• Configurar campanhas\n• Integrar redes sociais\n• Gerar relatórios\n\nO que deseja fazer?";
+        actions = [
+          { label: '🚀 Ativar Marketing', action: 'setup_marketing' }
+        ];
+      } else {
+        botResponse = "Entendi sua mensagem! Posso ajudá-lo de várias formas:";
+        actions = [
+          { label: '🔧 Diagnosticar Sistema', action: 'diagnose' },
+          { label: '❓ Ver Perguntas Frequentes', action: 'faq' },
+          { label: '👤 Falar com Humano', action: 'human_support' }
+        ];
+      }
+
+      setChatMessages(prev => [...prev, {
+        type: 'bot',
+        message: botResponse,
+        timestamp: new Date(),
+        actions: actions.length > 0 ? actions : undefined
+      }]);
+      setIsTyping(false);
+    }, 1000);
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -177,6 +325,13 @@ export default function Home() {
                 Preços
               </a>
               <button 
+                onClick={() => setShowChatBot(true)}
+                className="text-[#00a82d] hover:text-[#008c26] font-medium flex items-center gap-2 transition-colors"
+              >
+                <MessageCircle className="w-5 h-5" />
+                Falar com Suporte
+              </button>
+              <button 
                 onClick={() => setShowLoginModal(true)}
                 className="px-6 py-2 bg-[#00a82d] text-white rounded-lg hover:bg-[#008c26] transition-colors font-medium flex items-center gap-2"
               >
@@ -187,6 +342,114 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      {/* ChatBot Modal */}
+      {showChatBot && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-2xl h-[90vh] sm:h-[600px] flex flex-col">
+            {/* ChatBot Header */}
+            <div className="bg-gradient-to-r from-[#00a82d] to-[#008c26] p-6 rounded-t-3xl sm:rounded-t-2xl flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                  <Bot className="w-7 h-7 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-lg">Assistente DomainPro</h3>
+                  <p className="text-white/80 text-sm flex items-center gap-1">
+                    <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                    Online • Resposta instantânea
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowChatBot(false)}
+                className="text-white/80 hover:text-white transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* ChatBot Messages */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
+              {chatMessages.map((msg, index) => (
+                <div key={index} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[80%] ${msg.type === 'user' ? 'bg-[#00a82d] text-white' : 'bg-white text-gray-900 border border-gray-200'} rounded-2xl p-4 shadow-sm`}>
+                    <p className="whitespace-pre-line text-sm leading-relaxed">{msg.message}</p>
+                    {msg.actions && (
+                      <div className="mt-3 space-y-2">
+                        {msg.actions.map((action, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => handleChatAction(action.action)}
+                            className="w-full px-4 py-2 bg-[#00a82d]/10 hover:bg-[#00a82d]/20 text-[#00a82d] rounded-lg transition-colors text-sm font-medium text-left"
+                          >
+                            {action.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    <p className="text-xs opacity-60 mt-2">
+                      {msg.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+              
+              {isTyping && (
+                <div className="flex justify-start">
+                  <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
+                    <div className="flex gap-1">
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ChatBot Input */}
+            <div className="p-4 bg-white border-t border-gray-200 rounded-b-3xl sm:rounded-b-2xl">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  placeholder="Digite sua mensagem..."
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00a82d] focus:border-transparent outline-none"
+                />
+                <button
+                  onClick={handleSendMessage}
+                  className="px-6 py-3 bg-[#00a82d] text-white rounded-xl hover:bg-[#008c26] transition-colors font-medium"
+                >
+                  <Send className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="mt-3 flex gap-2 flex-wrap">
+                <button
+                  onClick={() => handleChatAction('diagnose')}
+                  className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-medium transition-colors"
+                >
+                  🔧 Diagnóstico
+                </button>
+                <button
+                  onClick={() => handleChatAction('faq')}
+                  className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-medium transition-colors"
+                >
+                  ❓ FAQ
+                </button>
+                <button
+                  onClick={() => handleChatAction('human_support')}
+                  className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-medium transition-colors"
+                >
+                  👤 Atendente
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Login Modal */}
       {showLoginModal && (
@@ -265,7 +528,7 @@ export default function Home() {
                   />
                   <span className="text-sm text-gray-600">Lembrar-me</span>
                 </label>
-                <a href="#" className="text-sm text-[#00a82d] hover:text-[#008c26] font-medium">
+                <a href="/recuperar-senha" className="text-sm text-[#00a82d] hover:text-[#008c26] font-medium">
                   Esqueceu a senha?
                 </a>
               </div>
@@ -624,6 +887,14 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Floating Support Button */}
+      <button
+        onClick={() => setShowChatBot(true)}
+        className="fixed bottom-6 right-6 w-16 h-16 bg-[#00a82d] text-white rounded-full shadow-2xl hover:bg-[#008c26] transition-all hover:scale-110 flex items-center justify-center z-40"
+      >
+        <MessageCircle className="w-7 h-7" />
+      </button>
     </div>
   );
 }
