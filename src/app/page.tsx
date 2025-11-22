@@ -25,7 +25,7 @@ export default function Home() {
     message: string;
     timestamp: Date;
     actions?: Array<{ label: string; action: string }>;
-  }>([
+  }>>([
     {
       type: 'bot',
       message: 'Olá! Sou o assistente inteligente do DomainPro. Como posso ajudá-lo hoje?',
@@ -199,7 +199,7 @@ export default function Home() {
           botResponse = "📚 Perguntas Frequentes:\n\n1️⃣ Como recuperar minha senha?\n2️⃣ Por que meu domínio não está abrindo?\n3️⃣ Como ativar ferramentas de marketing?\n4️⃣ Meu pagamento não processou, e agora?\n5️⃣ Como configurar meu cartão?\n\nDigite o número da pergunta ou descreva seu problema.";
           break;
         case 'setup':
-          botResponse = "🛠️ Soluções Automáticas do DomainPro\n\nO ChatBot está pronto para ajudar você a resolver problemas rapidamente e manter seu projeto funcionando sem travar. Aqui estão as funções automáticas que ele pode ativar quando detectar algum erro:\n\n📣 1. SOLUÇÕES DE MARKETING\n• Ajustes de SEO básico no domínio\n• Atualização automática de meta tags e descrições\n• Correção de links quebrados em campanhas\n• Verificação de redirecionamentos de páginas\n• Otimização de velocidade para melhorar o ranqueamento\n• Sugerir melhorias para páginas que não estão recebendo visitas\n• Recomendar palavras-chave com base no seu nicho\n\n🌐 2. CONFIGURAÇÕES DNS\n• Verificação do DNS do domínio\n• Correção de registros A, CNAME, MX ou TXT mal configurados\n• Teste de propagação DNS em tempo real\n• Detecção de conflitos entre provedores\n• Ajuste automático do apontamento da hospedagem\n• Reparação de falha de e-mail causada por erro de DNS\n• Notificação quando o domínio estiver quase expirando\n\n🔐 3. SEGURANÇA DO SISTEMA\n• Verificar automaticamente o certificado SSL\n• Renovar o HTTPS quando estiver perto de expirar\n• Bloquear tentativas suspeitas de login\n• Corrigir permissões inseguras no servidor\n• Detectar arquivos maliciosos e sugerir remoção\n• Ativar modo de proteção contra bots e ataques DDoS\n• Verificar se o app está seguindo padrões básicos de segurança\n\n🤖 Como o Bot trabalha\nSempre que uma dessas áreas apresentar erro ou risco, o ChatBot irá:\n1. Detectar o problema\n2. Informar você\n3. Corrigir automaticamente (quando permitido)\n4. Registrar tudo no histórico de manutenção";
+          botResponse = "⚙️ Assistente de Configuração Guiada\n\nVamos configurar seu sistema juntos! Escolha o que deseja configurar:";
           actions = [
             { label: '🌐 Configurar DNS', action: 'setup_dns' },
             { label: '📈 Ativar Marketing', action: 'setup_marketing' },
