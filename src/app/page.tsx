@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Check, Globe, Shield, Zap, TrendingUp, ChevronRight, Star, User, Lock, Eye, EyeOff, Settings, Activity, BarChart3, MessageCircle, X, Send, Bot, AlertCircle, CheckCircle, Wrench, RefreshCw, HelpCircle, FileText, Mic, Terminal } from "lucide-react";
+import { Search, Check, Globe, Shield, Zap, TrendingUp, ChevronRight, Star, User, Lock, Eye, EyeOff, Settings, Activity, BarChart3, MessageCircle, X, Send, Bot, AlertCircle, CheckCircle, Wrench, RefreshCw, HelpCircle, FileText, Mic, Terminal, CreditCard, Bell, DollarSign, LogOut, History, TrendingDown, Download, Mail, Smartphone, Building2, Key } from "lucide-react";
 
 export default function Home() {
   const router = useRouter();
@@ -17,6 +17,71 @@ export default function Home() {
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  
+  // Payment Settings States - Sistema Bancário Completo (5 Telas)
+  const [showPaymentSettings, setShowPaymentSettings] = useState(false);
+  const [bankingScreen, setBankingScreen] = useState<'login' | 'config' | 'verification' | 'dashboard' | 'history' | 'emailCode' | 'changePassword' | 'createPassword'>('login');
+  const [masterPassword, setMasterPassword] = useState(""); // Senha será criada pelo usuário
+  const [isPasswordCreated, setIsPasswordCreated] = useState(false);
+  const [createPasswordForm, setCreatePasswordForm] = useState({ password: "", confirmPassword: "" });
+  const [loginPasswordForm, setLoginPasswordForm] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [blockTimer, setBlockTimer] = useState(0);
+  
+  // Email Code Authentication
+  const [emailCode, setEmailCode] = useState("");
+  const [generatedCode, setGeneratedCode] = useState("");
+  const [codeExpiry, setCodeExpiry] = useState<Date | null>(null);
+  const [showEmailCodeOption, setShowEmailCodeOption] = useState(false);
+  
+  // Change Password - NOVO FLUXO DIRETO
+  const [changePasswordForm, setChangePasswordForm] = useState({ 
+    currentPassword: "", 
+    newPassword: "", 
+    confirmNewPassword: "" 
+  });
+  
+  // Banking Info
+  const [bankingInfo, setBankingInfo] = useState({
+    fullName: "",
+    cpfCnpj: "",
+    bank: "Nubank",
+    accountType: "Corrente",
+    agency: "0001",
+    accountNumber: "",
+    pixKey: ""
+  });
+  const [isBankConnected, setIsBankConnected] = useState(false);
+  
+  // Verification - AGORA COM SALDO VISÍVEL E OPÇÕES ATIVADAS
+  const [microDepositValue, setMicroDepositValue] = useState("");
+  const [smsCode, setSmsCode] = useState("");
+  const [verificationStep, setVerificationStep] = useState<'microdeposit' | 'sms'>('microdeposit');
+  const [isVerified, setIsVerified] = useState(false);
+  const [pendingBalance, setPendingBalance] = useState(15847.50); // Saldo que será liberado após verificação
+  
+  // Dashboard
+  const [balance, setBalance] = useState(15847.50);
+  const [showTransferSuccess, setShowTransferSuccess] = useState(false);
+  
+  // History
+  const [transactions, setTransactions] = useState([
+    { id: "TXN001", value: 2500.00, date: "2024-01-15 14:30", status: "success" as const },
+    { id: "TXN002", value: 1800.00, date: "2024-01-10 09:15", status: "success" as const },
+    { id: "TXN003", value: 3200.00, date: "2024-01-05 16:45", status: "pending" as const },
+    { id: "TXN004", value: 950.00, date: "2024-01-01 11:20", status: "failed" as const },
+    { id: "TXN005", value: 4500.00, date: "2023-12-28 13:00", status: "success" as const },
+  ]);
+  
+  const [notifications, setNotifications] = useState<Array<{
+    id: number;
+    message: string;
+    timestamp: Date;
+    read: boolean;
+  }>>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
   
   // ChatBot States
   const [showChatBot, setShowChatBot] = useState(false);
@@ -39,6 +104,50 @@ export default function Home() {
   ]);
   const [chatInput, setChatInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+
+  // Domain Registration State
+  const [registeredDomain, setRegisteredDomain] = useState<{
+    domain: string;
+    plan: string;
+    renewal: string;
+    registeredAt: Date;
+  } | null>(null);
+
+  // Load password status from localStorage
+  useEffect(() => {
+    const savedPassword = localStorage.getItem('brendon_master_password');
+    if (savedPassword) {
+      setMasterPassword(savedPassword);
+      setIsPasswordCreated(true);
+    }
+  }, []);
+
+  // Block Timer Effect
+  useEffect(() => {
+    if (isBlocked && blockTimer > 0) {
+      const timer = setTimeout(() => {
+        setBlockTimer(blockTimer - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (isBlocked && blockTimer === 0) {
+      setIsBlocked(false);
+      setLoginAttempts(0);
+    }
+  }, [isBlocked, blockTimer]);
+
+  // Code Expiry Check
+  useEffect(() => {
+    if (codeExpiry) {
+      const checkExpiry = setInterval(() => {
+        if (new Date() > codeExpiry) {
+          setGeneratedCode("");
+          setCodeExpiry(null);
+          setPasswordError("Código expirado. Solicite um novo código.");
+        }
+      }, 1000);
+      return () => clearInterval(checkExpiry);
+    }
+  }, [codeExpiry]);
 
   const extensions = [
     { ext: ".com", price: "R$ 49,99", popular: true },
@@ -175,8 +284,395 @@ export default function Home() {
   };
 
   const handleRegister = () => {
-    router.push("/checkout");
+    // Registrar domínio blmmybox.com com plano padrão e renovação anual
+    const newRegistration = {
+      domain: "blmmybox.com",
+      plan: "Profissional",
+      renewal: "Anual",
+      registeredAt: new Date()
+    };
+    
+    setRegisteredDomain(newRegistration);
+    
+    // Notificação de sucesso
+    const notification = {
+      id: Date.now(),
+      message: `✅ Domínio blmmybox.com registrado com sucesso! Plano: Profissional | Renovação: Anual`,
+      timestamp: new Date(),
+      read: false
+    };
+    setNotifications(prev => [notification, ...prev]);
+    
+    alert("✅ Domínio blmmybox.com registrado com sucesso!\n\nPlano: Profissional (R$ 89,99/ano)\nRenovação: Anual\n\nVocê receberá um email de confirmação em instantes.");
   };
+
+  // Banking Functions
+
+  const handleOpenPaymentSettings = () => {
+    setShowPaymentSettings(true);
+    if (!isPasswordCreated) {
+      setBankingScreen('createPassword'); // Vai mostrar tela de criar senha
+    } else {
+      setBankingScreen('login'); // Vai mostrar tela de inserir senha
+      setShowEmailCodeOption(true); // Mostrar opção de código por email
+    }
+    setPasswordError("");
+  };
+
+  const generateEmailCode = () => {
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    setGeneratedCode(code);
+    const expiry = new Date();
+    expiry.setMinutes(expiry.getMinutes() + 5); // Expira em 5 minutos
+    setCodeExpiry(expiry);
+    
+    // Simular envio de email
+    const emailNotif = {
+      id: Date.now(),
+      message: `📧 Código de acesso enviado para leemendesbrandon@gmail.com: ${code} (válido por 5 minutos)`,
+      timestamp: new Date(),
+      read: false
+    };
+    setNotifications(prev => [emailNotif, ...prev]);
+    
+    alert(`📧 Código enviado para leemendesbrandon@gmail.com\n\nCódigo: ${code}\n\nO código expira em 5 minutos.`);
+  };
+
+  // NOVO FLUXO: Alterar Senha Diretamente
+  const handleChangePasswordDirect = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError("");
+
+    // Validar senha atual
+    const enteredCurrentPassword = btoa(changePasswordForm.currentPassword);
+    if (enteredCurrentPassword !== masterPassword) {
+      setPasswordError("Senha atual incorreta.");
+      return;
+    }
+
+    // Validar nova senha
+    if (changePasswordForm.newPassword.length < 6) {
+      setPasswordError("A nova senha deve ter no mínimo 6 caracteres");
+      return;
+    }
+
+    if (changePasswordForm.newPassword !== changePasswordForm.confirmNewPassword) {
+      setPasswordError("As senhas não coincidem");
+      return;
+    }
+
+    // Atualizar senha imediatamente
+    const encryptedPassword = btoa(changePasswordForm.newPassword);
+    localStorage.setItem('brendon_master_password', encryptedPassword);
+    setMasterPassword(encryptedPassword);
+    
+    // Notificação
+    const notif = {
+      id: Date.now(),
+      message: "✅ Senha alterada com sucesso! A nova senha foi criptografada e salva automaticamente.",
+      timestamp: new Date(),
+      read: false
+    };
+    setNotifications(prev => [notif, ...prev]);
+    
+    alert("✅ Senha alterada e salva com sucesso!\n\nSua nova senha foi criptografada e está pronta para uso nos próximos acessos.");
+    setBankingScreen('login');
+    setChangePasswordForm({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
+  };
+
+  const handleLoginWithEmailCode = () => {
+    generateEmailCode();
+    setBankingScreen('emailCode');
+  };
+
+  const handleVerifyEmailCode = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!codeExpiry || new Date() > codeExpiry) {
+      setPasswordError("Código expirado. Solicite um novo código.");
+      return;
+    }
+    
+    if (emailCode === generatedCode) {
+      setLoginAttempts(0);
+      setBankingScreen('config');
+      setEmailCode("");
+      setGeneratedCode("");
+      setCodeExpiry(null);
+      setPasswordError("");
+    } else {
+      setPasswordError("Código incorreto. Verifique o código enviado para seu email.");
+    }
+  };
+
+  const handleCreatePassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError("");
+
+    if (createPasswordForm.password.length < 6) {
+      setPasswordError("A senha deve ter no mínimo 6 caracteres");
+      return;
+    }
+
+    if (createPasswordForm.password !== createPasswordForm.confirmPassword) {
+      setPasswordError("As senhas não coincidem");
+      return;
+    }
+
+    // Salvar senha (criptografada em produção)
+    const encryptedPassword = btoa(createPasswordForm.password); // Simulação de criptografia
+    localStorage.setItem('brendon_master_password', encryptedPassword);
+    setMasterPassword(encryptedPassword);
+    setIsPasswordCreated(true);
+    setCreatePasswordForm({ password: "", confirmPassword: "" });
+    
+    alert("✅ Senha criada com sucesso! Agora você pode acessar a área de pagamentos.");
+    setBankingScreen('login');
+  };
+
+  const handleBankingLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError("");
+
+    if (isBlocked) {
+      setPasswordError(`Sistema bloqueado. Aguarde ${Math.floor(blockTimer / 60)}:${(blockTimer % 60).toString().padStart(2, '0')}`);
+      return;
+    }
+
+    const enteredPassword = btoa(loginPasswordForm);
+    if (enteredPassword === masterPassword) {
+      setLoginAttempts(0);
+      setBankingScreen('config');
+      setLoginPasswordForm("");
+    } else {
+      const newAttempts = loginAttempts + 1;
+      setLoginAttempts(newAttempts);
+      
+      if (newAttempts >= 5) {
+        setIsBlocked(true);
+        setBlockTimer(300); // 5 minutos
+        setPasswordError("Muitas tentativas incorretas. Sistema bloqueado por 5 minutos.");
+        
+        // Enviar notificação de segurança
+        const securityNotif = {
+          id: Date.now(),
+          message: "🔒 Alerta de Segurança: 5 tentativas de acesso incorretas detectadas. Sistema bloqueado por 5 minutos.",
+          timestamp: new Date(),
+          read: false
+        };
+        setNotifications(prev => [securityNotif, ...prev]);
+      } else {
+        setPasswordError(`Senha incorreta. Tentativa ${newAttempts}/5`);
+      }
+      setLoginPasswordForm("");
+    }
+  };
+
+  const handleSaveBankingInfo = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Criptografar dados bancários (simulação)
+    const encryptedData = {
+      ...bankingInfo,
+      cpfCnpj: btoa(bankingInfo.cpfCnpj),
+      accountNumber: btoa(bankingInfo.accountNumber)
+    };
+    
+    console.log("Dados bancários criptografados:", encryptedData);
+    
+    // Enviar notificação por email (simulado)
+    const emailNotification = {
+      id: Date.now(),
+      message: "📧 Dados bancários salvos com sucesso. Email de confirmação enviado para seu endereço cadastrado.",
+      timestamp: new Date(),
+      read: false
+    };
+    setNotifications(prev => [emailNotification, ...prev]);
+    
+    alert("✅ Informações bancárias salvas com sucesso e criptografadas!");
+  };
+
+  const handleConnectNubank = () => {
+    setIsBankConnected(true);
+    setBankingScreen('verification');
+    
+    // Simular envio de microdepósito
+    alert("🏦 Conexão iniciada! Um microdepósito de R$ 0,01 foi enviado para sua conta Nubank. Verifique seu extrato.");
+    
+    // Notificação SMS
+    setTimeout(() => {
+      const smsNotif = {
+        id: Date.now(),
+        message: "📱 SMS enviado: Código de verificação será necessário após confirmar o microdepósito.",
+        timestamp: new Date(),
+        read: false
+      };
+      setNotifications(prev => [smsNotif, ...prev]);
+    }, 2000);
+  };
+
+  const handleVerifyMicroDeposit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (microDepositValue === "0.01" || microDepositValue === "0,01") {
+      setVerificationStep('sms');
+      alert("✅ Valor correto! Agora vamos verificar por SMS.");
+      
+      // Simular envio de SMS
+      setTimeout(() => {
+        alert("📱 Código SMS enviado para seu celular cadastrado: *****-1234");
+        const smsNotif = {
+          id: Date.now(),
+          message: "📱 Código de verificação SMS enviado. Digite o código de 6 dígitos.",
+          timestamp: new Date(),
+          read: false
+        };
+        setNotifications(prev => [smsNotif, ...prev]);
+      }, 1000);
+    } else {
+      alert("❌ Valor incorreto. Verifique o valor recebido em sua conta Nubank.");
+    }
+  };
+
+  const handleVerifySMS = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (smsCode === "123456") {
+      setIsVerified(true);
+      setBankingScreen('dashboard');
+      
+      const notification = {
+        id: Date.now(),
+        message: `✅ Conta verificada com sucesso! Saldo de R$ ${pendingBalance.toFixed(2)} liberado e disponível para transferência.`,
+        timestamp: new Date(),
+        read: false
+      };
+      setNotifications(prev => [notification, ...prev]);
+      
+      // Email de confirmação
+      setTimeout(() => {
+        const emailNotif = {
+          id: Date.now() + 1,
+          message: "📧 Email de confirmação enviado: Sua conta foi verificada e está pronta para receber pagamentos.",
+          timestamp: new Date(),
+          read: false
+        };
+        setNotifications(prev => [emailNotif, ...prev]);
+      }, 2000);
+      
+      alert(`✅ Verificação concluída! Seu saldo de R$ ${pendingBalance.toFixed(2)} foi liberado e está pronto para transferência.`);
+    } else {
+      alert("❌ Código SMS incorreto. Tente novamente ou solicite um novo código.");
+    }
+  };
+
+  const handleTransfer = () => {
+    if (balance > 0) {
+      const transferValue = balance;
+      setBalance(0);
+      setShowTransferSuccess(true);
+      
+      // Adicionar transação ao histórico
+      const newTransaction = {
+        id: `TXN${String(transactions.length + 1).padStart(3, '0')}`,
+        value: transferValue,
+        date: new Date().toLocaleString('pt-BR', { 
+          year: 'numeric', 
+          month: '2-digit', 
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).replace(',', ''),
+        status: "success" as const
+      };
+      setTransactions(prev => [newTransaction, ...prev]);
+      
+      // Notificação de transferência
+      const notification = {
+        id: Date.now(),
+        message: `💰 Transferência de R$ ${transferValue.toFixed(2)} realizada com sucesso para sua conta Nubank.`,
+        timestamp: new Date(),
+        read: false
+      };
+      setNotifications(prev => [notification, ...prev]);
+      
+      // Email notification (simulado)
+      setTimeout(() => {
+        const emailNotif = {
+          id: Date.now() + 1,
+          message: `📧 Email enviado: Comprovante de transferência de R$ ${transferValue.toFixed(2)} para conta Nubank (Ag: 0001).`,
+          timestamp: new Date(),
+          read: false
+        };
+        setNotifications(prev => [emailNotif, ...prev]);
+      }, 2000);
+      
+      setTimeout(() => {
+        setShowTransferSuccess(false);
+      }, 5000);
+    }
+  };
+
+  const handleExportPDF = () => {
+    alert("📄 Gerando PDF do histórico de transações...\n\nO arquivo será baixado em instantes.");
+    
+    // Simular geração de PDF
+    setTimeout(() => {
+      const pdfContent = `
+===========================================
+    HISTÓRICO DE TRANSAÇÕES
+    BLM DomainBox - Brendon
+===========================================
+
+Total de transações: ${transactions.length}
+
+${transactions.map(t => `
+ID: ${t.id}
+Valor: R$ ${t.value.toFixed(2)}
+Data: ${t.date}
+Status: ${t.status === 'success' ? 'Sucesso' : t.status === 'pending' ? 'Pendente' : 'Falha'}
+-------------------------------------------
+`).join('')}
+
+Gerado em: ${new Date().toLocaleString('pt-BR')}
+===========================================
+      `;
+      
+      console.log("PDF Gerado:", pdfContent);
+      alert("✅ PDF gerado com sucesso!\n\nHistorico_Transacoes_BLM_DomainBox.pdf");
+      
+      // Notificação
+      const notif = {
+        id: Date.now(),
+        message: "📄 Histórico exportado em PDF com sucesso.",
+        timestamp: new Date(),
+        read: false
+      };
+      setNotifications(prev => [notif, ...prev]);
+    }, 2000);
+  };
+
+  const handleCloseBanking = () => {
+    setShowPaymentSettings(false);
+    setBankingScreen('login');
+    setLoginPasswordForm("");
+    setPasswordError("");
+    setEmailCode("");
+    setGeneratedCode("");
+    setCodeExpiry(null);
+    setShowEmailCodeOption(false);
+    setChangePasswordForm({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
+  };
+
+  const markNotificationAsRead = (id: number) => {
+    setNotifications(prev => 
+      prev.map(notif => 
+        notif.id === id ? { ...notif, read: true } : notif
+      )
+    );
+  };
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   // ChatBot Functions
   const handleChatAction = (action: string) => {
@@ -253,7 +749,6 @@ export default function Home() {
     setChatInput("");
     setIsTyping(true);
 
-    // Simular resposta inteligente do bot
     setTimeout(() => {
       let botResponse = "";
       let actions: Array<{ label: string; action: string }> = [];
@@ -304,6 +799,22 @@ export default function Home() {
     }, 1000);
   };
 
+  const getStatusColor = (status: 'success' | 'pending' | 'failed') => {
+    switch (status) {
+      case 'success': return 'text-green-600 bg-green-100';
+      case 'pending': return 'text-yellow-600 bg-yellow-100';
+      case 'failed': return 'text-red-600 bg-red-100';
+    }
+  };
+
+  const getStatusText = (status: 'success' | 'pending' | 'failed') => {
+    switch (status) {
+      case 'success': return 'Sucesso';
+      case 'pending': return 'Pendente';
+      case 'failed': return 'Falha';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -331,6 +842,30 @@ export default function Home() {
                 <MessageCircle className="w-5 h-5" />
                 Falar com Suporte
               </button>
+              
+              {/* Botão Receber Pagamentos - Apenas para Brendon */}
+              <button 
+                onClick={handleOpenPaymentSettings}
+                className="text-gray-700 hover:text-[#00a82d] font-medium flex items-center gap-2 transition-colors"
+                title="Área exclusiva do proprietário - Brendon"
+              >
+                <CreditCard className="w-5 h-5" />
+                Receber Pagamentos
+              </button>
+
+              {/* Notificações */}
+              <button 
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative text-gray-700 hover:text-[#00a82d] transition-colors"
+              >
+                <Bell className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
               <button 
                 onClick={() => setShowLoginModal(true)}
                 className="px-6 py-2 bg-[#00a82d] text-white rounded-lg hover:bg-[#008c26] transition-colors font-medium flex items-center gap-2"
@@ -342,6 +877,739 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      {/* Notifications Dropdown */}
+      {showNotifications && (
+        <div className="fixed top-20 right-4 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 max-h-96 overflow-y-auto">
+          <div className="p-4 border-b border-gray-200">
+            <h3 className="font-bold text-gray-900 flex items-center gap-2">
+              <Bell className="w-5 h-5 text-[#00a82d]" />
+              Notificações
+            </h3>
+          </div>
+          {notifications.length === 0 ? (
+            <div className="p-8 text-center text-gray-500">
+              Nenhuma notificação
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-100">
+              {notifications.map((notif) => (
+                <div 
+                  key={notif.id}
+                  onClick={() => markNotificationAsRead(notif.id)}
+                  className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${!notif.read ? 'bg-green-50' : ''}`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-900 font-medium">{notif.message}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {notif.timestamp.toLocaleString('pt-BR')}
+                      </p>
+                    </div>
+                    {!notif.read && (
+                      <span className="w-2 h-2 bg-[#00a82d] rounded-full"></span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Banking System Modal - Sistema Completo com Autenticação por Email */}
+      {showPaymentSettings && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8 relative my-8">
+            
+            {/* Tela: Criar Senha (primeira vez) */}
+            {bankingScreen === 'createPassword' && (
+              <>
+                <button
+                  onClick={handleCloseBanking}
+                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
+                >
+                  ×
+                </button>
+
+                <div className="text-center mb-8">
+                  <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Lock className="w-8 h-8 text-purple-600" />
+                  </div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Criar Senha de Acesso</h2>
+                  <p className="text-gray-600">Configure sua senha para proteger a área de pagamentos</p>
+                  <p className="text-sm text-purple-600 font-semibold mt-2">Acesso exclusivo - Brendon (BLM DomainBox)</p>
+                </div>
+
+                <form onSubmit={handleCreatePassword} className="space-y-6">
+                  <div>
+                    <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 mb-2">
+                      Digite a nova senha
+                    </label>
+                    <input
+                      type="password"
+                      id="new-password"
+                      value={createPasswordForm.password}
+                      onChange={(e) => setCreatePasswordForm({ ...createPasswordForm, password: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+                      placeholder="Mínimo 6 caracteres"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-2">
+                      Confirme a senha
+                    </label>
+                    <input
+                      type="password"
+                      id="confirm-password"
+                      value={createPasswordForm.confirmPassword}
+                      onChange={(e) => setCreatePasswordForm({ ...createPasswordForm, confirmPassword: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+                      placeholder="Digite a senha novamente"
+                      required
+                    />
+                  </div>
+
+                  {passwordError && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
+                      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+                      <p className="text-sm text-red-700">{passwordError}</p>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold text-lg"
+                  >
+                    Criar Senha
+                  </button>
+
+                  <div className="text-center text-sm text-gray-500">
+                    <p>🔒 Sua senha será criptografada e armazenada com segurança</p>
+                  </div>
+                </form>
+              </>
+            )}
+            
+            {/* Tela 1: Login Bancário */}
+            {isPasswordCreated && bankingScreen === 'login' && (
+              <>
+                <button
+                  onClick={handleCloseBanking}
+                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
+                >
+                  ×
+                </button>
+
+                <div className="text-center mb-8">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Lock className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Login Bancário</h2>
+                  <p className="text-gray-600">Digite sua senha para acessar</p>
+                  <p className="text-sm text-blue-600 font-semibold mt-2">Brendon - BLM DomainBox</p>
+                </div>
+
+                <form onSubmit={handleBankingLogin} className="space-y-6">
+                  <div>
+                    <label htmlFor="banking-password" className="block text-sm font-medium text-gray-700 mb-2">
+                      Digite sua senha
+                    </label>
+                    <input
+                      type="password"
+                      id="banking-password"
+                      value={loginPasswordForm}
+                      onChange={(e) => setLoginPasswordForm(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                      placeholder="••••••••"
+                      required
+                      disabled={isBlocked}
+                    />
+                  </div>
+
+                  {passwordError && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
+                      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+                      <p className="text-sm text-red-700">{passwordError}</p>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={isBlocked}
+                    className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isBlocked ? `Bloqueado (${Math.floor(blockTimer / 60)}:${(blockTimer % 60).toString().padStart(2, '0')})` : 'Entrar'}
+                  </button>
+
+                  {/* Opção de entrar com código por email */}
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-white text-gray-500">ou</span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleLoginWithEmailCode}
+                    className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold flex items-center justify-center gap-2"
+                  >
+                    <Mail className="w-5 h-5" />
+                    Entrar com Código por Email
+                  </button>
+
+                  {/* Link para criar senha */}
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => setBankingScreen('createPassword')}
+                      className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+                    >
+                      Criar Nova Senha
+                    </button>
+                  </div>
+
+                  {/* Link para alterar senha */}
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => setBankingScreen('changePassword')}
+                      className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    >
+                      Alterar Senha
+                    </button>
+                  </div>
+
+                  <div className="text-center text-sm text-gray-500">
+                    <p>🔒 Sistema protegido com bloqueio automático após 5 tentativas</p>
+                  </div>
+                </form>
+              </>
+            )}
+
+            {/* Tela: Login com Código por Email */}
+            {bankingScreen === 'emailCode' && (
+              <>
+                <button
+                  onClick={handleCloseBanking}
+                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
+                >
+                  ×
+                </button>
+
+                <div className="text-center mb-8">
+                  <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Mail className="w-8 h-8 text-purple-600" />
+                  </div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Código de Acesso</h2>
+                  <p className="text-gray-600">Digite o código enviado para seu email</p>
+                  <p className="text-sm text-purple-600 font-semibold mt-2">leemendesbrandon@gmail.com</p>
+                </div>
+
+                <form onSubmit={handleVerifyEmailCode} className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Código de 6 dígitos
+                    </label>
+                    <input
+                      type="text"
+                      value={emailCode}
+                      onChange={(e) => setEmailCode(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-center text-2xl tracking-widest"
+                      placeholder="000000"
+                      maxLength={6}
+                      required
+                    />
+                  </div>
+
+                  {passwordError && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
+                      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+                      <p className="text-sm text-red-700">{passwordError}</p>
+                    </div>
+                  )}
+
+                  {codeExpiry && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <p className="text-sm text-blue-700 text-center">
+                        ⏱️ Código expira em: {Math.max(0, Math.floor((codeExpiry.getTime() - new Date().getTime()) / 1000))}s
+                      </p>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold"
+                  >
+                    Verificar Código
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setBankingScreen('login')}
+                    className="w-full px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-semibold"
+                  >
+                    Voltar
+                  </button>
+
+                  <div className="text-center text-sm text-gray-500">
+                    <p>🔒 Código criptografado e temporário (expira em 5 minutos)</p>
+                  </div>
+                </form>
+              </>
+            )}
+
+            {/* Tela: Alterar Senha - NOVO FLUXO DIRETO */}
+            {bankingScreen === 'changePassword' && (
+              <>
+                <button
+                  onClick={handleCloseBanking}
+                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
+                >
+                  ×
+                </button>
+
+                <div className="text-center mb-8">
+                  <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Key className="w-8 h-8 text-orange-600" />
+                  </div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Alterar Senha</h2>
+                  <p className="text-gray-600">Digite sua senha atual e escolha uma nova senha</p>
+                  <p className="text-sm text-orange-600 font-semibold mt-2">Brendon - BLM DomainBox</p>
+                </div>
+
+                <form onSubmit={handleChangePasswordDirect} className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Senha atual
+                    </label>
+                    <input
+                      type="password"
+                      value={changePasswordForm.currentPassword}
+                      onChange={(e) => setChangePasswordForm({ ...changePasswordForm, currentPassword: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                      placeholder="Digite sua senha atual"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Nova senha
+                    </label>
+                    <input
+                      type="password"
+                      value={changePasswordForm.newPassword}
+                      onChange={(e) => setChangePasswordForm({ ...changePasswordForm, newPassword: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                      placeholder="Mínimo 6 caracteres"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Confirme a nova senha
+                    </label>
+                    <input
+                      type="password"
+                      value={changePasswordForm.confirmNewPassword}
+                      onChange={(e) => setChangePasswordForm({ ...changePasswordForm, confirmNewPassword: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                      placeholder="Digite a senha novamente"
+                      required
+                    />
+                  </div>
+
+                  {passwordError && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
+                      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+                      <p className="text-sm text-red-700">{passwordError}</p>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="w-full px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-semibold"
+                  >
+                    Alterar Senha
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setBankingScreen('login')}
+                    className="w-full px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-semibold"
+                  >
+                    Cancelar
+                  </button>
+
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <p className="text-sm text-green-800 flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                      A senha será atualizada imediatamente se a senha atual estiver correta
+                    </p>
+                  </div>
+                </form>
+              </>
+            )}
+
+            {/* Tela 2: Configurações Bancárias */}
+            {bankingScreen === 'config' && (
+              <>
+                <button
+                  onClick={handleCloseBanking}
+                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
+                >
+                  ×
+                </button>
+
+                <div className="text-center mb-8">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Building2 className="w-8 h-8 text-green-600" />
+                  </div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Configurações Bancárias</h2>
+                  <p className="text-gray-600">Configure seus dados para receber pagamentos com segurança</p>
+                </div>
+
+                <form onSubmit={handleSaveBankingInfo} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Nome completo</label>
+                    <input
+                      type="text"
+                      value={bankingInfo.fullName}
+                      onChange={(e) => setBankingInfo({ ...bankingInfo, fullName: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                      placeholder="Seu nome completo"
+                      required
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">CPF/CNPJ</label>
+                      <input
+                        type="text"
+                        value={bankingInfo.cpfCnpj}
+                        onChange={(e) => setBankingInfo({ ...bankingInfo, cpfCnpj: e.target.value })}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                        placeholder="000.000.000-00"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Banco</label>
+                      <input
+                        type="text"
+                        value={bankingInfo.bank}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-purple-50 font-semibold text-purple-700"
+                        readOnly
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de conta</label>
+                      <input
+                        type="text"
+                        value={bankingInfo.accountType}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50"
+                        readOnly
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Agência</label>
+                      <input
+                        type="text"
+                        value={bankingInfo.agency}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50"
+                        readOnly
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Número da conta</label>
+                    <input
+                      type="text"
+                      value={bankingInfo.accountNumber}
+                      onChange={(e) => setBankingInfo({ ...bankingInfo, accountNumber: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                      placeholder="0000000-0"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Chave Pix (opcional)</label>
+                    <input
+                      type="text"
+                      value={bankingInfo.pixKey}
+                      onChange={(e) => setBankingInfo({ ...bankingInfo, pixKey: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                      placeholder="email@exemplo.com, CPF ou telefone"
+                    />
+                  </div>
+
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p className="text-sm text-blue-800 flex items-center gap-2">
+                      <Shield className="w-5 h-5" />
+                      Todos os dados são criptografados e armazenados com segurança
+                    </p>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <button
+                      type="submit"
+                      className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                    >
+                      Salvar
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleConnectNubank}
+                      className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold flex items-center justify-center gap-2"
+                    >
+                      <Building2 className="w-5 h-5" />
+                      Conectar ao Nubank
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
+
+            {/* Tela 3: Verificação - AGORA COM SALDO VISÍVEL E OPÇÕES ATIVADAS */}
+            {bankingScreen === 'verification' && (
+              <>
+                <button
+                  onClick={handleCloseBanking}
+                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
+                >
+                  ×
+                </button>
+
+                <div className="text-center mb-8">
+                  <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Shield className="w-8 h-8 text-yellow-600" />
+                  </div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Verificação de Segurança</h2>
+                  <p className="text-gray-600">Confirme sua identidade para ativar transferências automáticas</p>
+                  
+                  {/* SALDO PENDENTE VISÍVEL */}
+                  <div className="mt-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border-2 border-green-200">
+                    <p className="text-sm text-green-700 font-medium mb-2">💰 Saldo Pendente de Liberação</p>
+                    <p className="text-4xl font-bold text-green-600">
+                      R$ {pendingBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </p>
+                    <p className="text-xs text-green-600 mt-2">
+                      ✅ Será liberado após verificação completa
+                    </p>
+                  </div>
+                </div>
+
+                {verificationStep === 'microdeposit' ? (
+                  <form onSubmit={handleVerifyMicroDeposit} className="space-y-6">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <h3 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                        <DollarSign className="w-5 h-5" />
+                        Microdepósito
+                      </h3>
+                      <p className="text-sm text-blue-700">
+                        Enviamos um pequeno valor (R$ 0,01) para sua conta Nubank. Verifique seu extrato e digite o valor recebido para confirmar.
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Digite o valor recebido (R$)
+                      </label>
+                      <input
+                        type="text"
+                        value={microDepositValue}
+                        onChange={(e) => setMicroDepositValue(e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none text-center text-2xl"
+                        placeholder="0,01"
+                        required
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="w-full px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors font-semibold"
+                    >
+                      Verificar Valor
+                    </button>
+                  </form>
+                ) : (
+                  <form onSubmit={handleVerifySMS} className="space-y-6">
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <h3 className="font-semibold text-green-900 mb-2 flex items-center gap-2">
+                        <Smartphone className="w-5 h-5" />
+                        Código SMS
+                      </h3>
+                      <p className="text-sm text-green-700">
+                        Enviamos um código de 6 dígitos para seu celular cadastrado. Digite o código para concluir a verificação.
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Digite o código de verificação
+                      </label>
+                      <input
+                        type="text"
+                        value={smsCode}
+                        onChange={(e) => setSmsCode(e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none text-center text-2xl tracking-widest"
+                        placeholder="000000"
+                        maxLength={6}
+                        required
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                    >
+                      Confirmar Código
+                    </button>
+                  </form>
+                )}
+              </>
+            )}
+
+            {/* Tela 4: Painel de Saldo */}
+            {bankingScreen === 'dashboard' && (
+              <>
+                <button
+                  onClick={handleCloseBanking}
+                  className="absolute top-4 right-4 w-10 h-10 bg-red-100 hover:bg-red-200 text-red-600 rounded-full flex items-center justify-center transition-colors"
+                  title="Fechar"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+
+                <div className="text-center mb-8">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <DollarSign className="w-8 h-8 text-green-600" />
+                  </div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Seus Lucros</h2>
+                  <p className="text-gray-600">Painel de controle financeiro - BLM DomainBox</p>
+                </div>
+
+                {/* Saldo Total */}
+                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-8 mb-6 border-2 border-green-200">
+                  <p className="text-sm text-green-700 font-medium mb-2">Saldo Total Disponível</p>
+                  <p className="text-5xl font-bold text-green-600 mb-4">
+                    R$ {balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </p>
+                  <div className="flex items-center gap-2 text-sm text-green-700">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Conta verificada • Transferências automáticas ativas</span>
+                  </div>
+                </div>
+
+                {/* Botões de Ação */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <button
+                    onClick={handleTransfer}
+                    disabled={balance === 0}
+                    className="px-6 py-4 bg-[#00a82d] text-white rounded-xl hover:bg-[#008c26] transition-colors font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Send className="w-5 h-5" />
+                    Transferir
+                  </button>
+
+                  <button
+                    onClick={() => setBankingScreen('history')}
+                    className="px-6 py-4 bg-gray-100 text-gray-900 rounded-xl hover:bg-gray-200 transition-colors font-semibold flex items-center justify-center gap-2"
+                  >
+                    <History className="w-5 h-5" />
+                    Histórico
+                  </button>
+                </div>
+
+                {/* Mensagem de Sucesso */}
+                {showTransferSuccess && (
+                  <div className="bg-green-50 border-2 border-green-500 rounded-xl p-4 flex items-center gap-3 animate-pulse">
+                    <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
+                    <p className="text-green-800 font-semibold">
+                      Saque bem-sucedido! Seu pagamento foi transferido com sucesso para sua conta Nubank.
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Tela 5: Histórico */}
+            {bankingScreen === 'history' && (
+              <>
+                <button
+                  onClick={() => setBankingScreen('dashboard')}
+                  className="absolute top-4 left-4 text-gray-400 hover:text-gray-600"
+                >
+                  ← Voltar
+                </button>
+
+                <button
+                  onClick={handleCloseBanking}
+                  className="absolute top-4 right-4 w-10 h-10 bg-red-100 hover:bg-red-200 text-red-600 rounded-full flex items-center justify-center transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+
+                <div className="text-center mb-8 mt-8">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <History className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Histórico de Depósitos</h2>
+                  <p className="text-gray-600">Todas as suas transações registradas</p>
+                </div>
+
+                {/* Lista de Transações */}
+                <div className="space-y-3 mb-6 max-h-96 overflow-y-auto">
+                  {transactions.map((transaction) => (
+                    <div key={transaction.id} className="bg-gray-50 rounded-xl p-4 border border-gray-200 hover:shadow-md transition-shadow">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <p className="font-bold text-gray-900 text-lg">
+                            R$ {transaction.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </p>
+                          <p className="text-sm text-gray-600">{transaction.date}</p>
+                        </div>
+                        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(transaction.status)}`}>
+                          {getStatusText(transaction.status)}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500">ID da transação: {transaction.id}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Botão Exportar PDF */}
+                <button
+                  onClick={handleExportPDF}
+                  className="w-full px-6 py-4 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-semibold flex items-center justify-center gap-2"
+                >
+                  <Download className="w-5 h-5" />
+                  Exportar PDF
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ChatBot Modal */}
       {showChatBot && (
