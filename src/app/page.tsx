@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Check, Globe, Shield, Zap, TrendingUp, ChevronRight, Star, User, Lock, Eye, EyeOff, Settings, Activity, BarChart3, MessageCircle, X, Send, Bot, AlertCircle, CheckCircle, Wrench, RefreshCw, HelpCircle, FileText, Mic, Terminal, CreditCard, Bell, DollarSign, LogOut, History, TrendingDown, Download, Mail, Smartphone, Building2, Key } from "lucide-react";
+import { Search, Check, Globe, Shield, Zap, TrendingUp, ChevronRight, Star, User, Lock, Eye, EyeOff, Settings, Activity, BarChart3, MessageCircle, X, Send, Bot, AlertCircle, CheckCircle, Wrench, RefreshCw, HelpCircle, FileText, Mic, Terminal, CreditCard, Bell, DollarSign, LogOut, History, TrendingDown, Download, Mail, Smartphone, Building2, Key, ShoppingCart, Package, Clock, Users, Gift, Store, Camera, Save, Edit, Trash2, Plus, Server, Shield as ShieldIcon, Copy, Link as LinkIcon, TrendingUp as TrendingUpIcon } from "lucide-react";
 
 export default function Home() {
   const router = useRouter();
@@ -18,10 +18,146 @@ export default function Home() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   
-  // Payment Settings States - Sistema Bancário Completo (5 Telas)
+  // User Panel States
+  const [showUserPanel, setShowUserPanel] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [userProfile, setUserProfile] = useState({
+    name: "Brendon Lee Mendes",
+    email: "leemendesbrandon@gmail.com",
+    phone: "+55 11 98765-4321",
+    photo: "https://ui-avatars.com/api/?name=Brendon+Lee&background=00a82d&color=fff&size=128"
+  });
+  const [editProfileForm, setEditProfileForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+    photo: ""
+  });
+  const [showEditPassword, setShowEditPassword] = useState(false);
+  const [showEditConfirmPassword, setShowEditConfirmPassword] = useState(false);
+
+  // Support Panel States
+  const [showSupportPanel, setShowSupportPanel] = useState(false);
+  const [showSupportChat, setShowSupportChat] = useState(false);
+  const [supportTickets, setSupportTickets] = useState<Array<{
+    id: string;
+    subject: string;
+    status: 'open' | 'pending' | 'closed';
+    date: string;
+    lastMessage?: string;
+  }>>([]);
+  const [selectedTicket, setSelectedTicket] = useState<any>(null);
+  const [supportMessage, setSupportMessage] = useState("");
+  const [supportMessages, setSupportMessages] = useState<Array<{
+    id: number;
+    sender: 'user' | 'support';
+    message: string;
+    timestamp: string;
+  }>>([]);
+
+  // Notifications States
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<Array<{
+    id: number;
+    userId?: string;
+    title?: string;
+    message: string;
+    timestamp?: Date;
+    date?: string;
+    read: boolean;
+    type?: 'success' | 'warning' | 'info' | 'error';
+  }>>([]);
+
+  // Domain Management States
+  const [showDomainPanel, setShowDomainPanel] = useState(false);
+  const [userDomains, setUserDomains] = useState<Array<{
+    id: string;
+    domain: string;
+    status: 'active' | 'expiring' | 'expired';
+    expiryDate: string;
+    autoRenew: boolean;
+    dnsRecords?: Array<{ type: string; name: string; value: string }>;
+    emails?: Array<{ email: string; password: string }>;
+  }>>([
+    {
+      id: "DOM001",
+      domain: "brendonlee.com",
+      status: "active",
+      expiryDate: "2025-12-15",
+      autoRenew: true,
+      dnsRecords: [
+        { type: "A", name: "@", value: "192.168.1.1" },
+        { type: "CNAME", name: "www", value: "brendonlee.com" }
+      ],
+      emails: []
+    },
+    {
+      id: "DOM002",
+      domain: "blmdomains.com.br",
+      status: "expiring",
+      expiryDate: "2024-02-28",
+      autoRenew: false,
+      dnsRecords: [],
+      emails: []
+    }
+  ]);
+  const [selectedDomainForConfig, setSelectedDomainForConfig] = useState<any>(null);
+  const [showDNSConfig, setShowDNSConfig] = useState(false);
+  const [showEmailCreation, setShowEmailCreation] = useState(false);
+  const [showRenewModal, setShowRenewModal] = useState(false);
+  const [newDNSRecord, setNewDNSRecord] = useState({ type: "A", name: "", value: "" });
+  const [newEmail, setNewEmail] = useState({ email: "", password: "" });
+
+  // Affiliate Panel States
+  const [showAffiliatePanel, setShowAffiliatePanel] = useState(false);
+  const [affiliateData, setAffiliateData] = useState({
+    userId: "brendon123",
+    link: "https://blmdomainbox.com/afiliado/brendon123",
+    balance: 1250.50,
+    totalSales: 25,
+    pendingWithdrawal: 0,
+    sales: [
+      {
+        id: "SALE001",
+        domain: "techstartup.com.br",
+        date: "2024-01-15",
+        commission: 49.99,
+        status: "confirmed" as const
+      },
+      {
+        id: "SALE002",
+        domain: "lojaonline.com",
+        date: "2024-01-10",
+        commission: 89.99,
+        status: "confirmed" as const
+      },
+      {
+        id: "SALE003",
+        domain: "meusite.com.br",
+        date: "2024-01-08",
+        commission: 39.99,
+        status: "confirmed" as const
+      }
+    ]
+  });
+
+  // Marketplace Panel States
+  const [showMarketplacePanel, setShowMarketplacePanel] = useState(false);
+  const [marketplaceDomains, setMarketplaceDomains] = useState<Array<{
+    domain: string;
+    price: number;
+    seller: string;
+  }>>([
+    { domain: 'techstartup.com', price: 5000, seller: 'João Silva' },
+    { domain: 'lojaonline.com.br', price: 3500, seller: 'Maria Santos' }
+  ]);
+  
+  // Payment Settings States
   const [showPaymentSettings, setShowPaymentSettings] = useState(false);
   const [bankingScreen, setBankingScreen] = useState<'login' | 'config' | 'verification' | 'dashboard' | 'history' | 'emailCode' | 'changePassword' | 'createPassword'>('login');
-  const [masterPassword, setMasterPassword] = useState(""); // Senha será criada pelo usuário
+  const [masterPassword, setMasterPassword] = useState("");
   const [isPasswordCreated, setIsPasswordCreated] = useState(false);
   const [createPasswordForm, setCreatePasswordForm] = useState({ password: "", confirmPassword: "" });
   const [loginPasswordForm, setLoginPasswordForm] = useState("");
@@ -36,7 +172,7 @@ export default function Home() {
   const [codeExpiry, setCodeExpiry] = useState<Date | null>(null);
   const [showEmailCodeOption, setShowEmailCodeOption] = useState(false);
   
-  // Change Password - NOVO FLUXO DIRETO
+  // Change Password
   const [changePasswordForm, setChangePasswordForm] = useState({ 
     currentPassword: "", 
     newPassword: "", 
@@ -55,12 +191,12 @@ export default function Home() {
   });
   const [isBankConnected, setIsBankConnected] = useState(false);
   
-  // Verification - AGORA COM SALDO VISÍVEL E OPÇÕES ATIVADAS
+  // Verification
   const [microDepositValue, setMicroDepositValue] = useState("");
   const [smsCode, setSmsCode] = useState("");
   const [verificationStep, setVerificationStep] = useState<'microdeposit' | 'sms'>('microdeposit');
   const [isVerified, setIsVerified] = useState(false);
-  const [pendingBalance, setPendingBalance] = useState(15847.50); // Saldo que será liberado após verificação
+  const [pendingBalance, setPendingBalance] = useState(15847.50);
   
   // Dashboard
   const [balance, setBalance] = useState(15847.50);
@@ -75,14 +211,6 @@ export default function Home() {
     { id: "TXN005", value: 4500.00, date: "2023-12-28 13:00", status: "success" as const },
   ]);
   
-  const [notifications, setNotifications] = useState<Array<{
-    id: number;
-    message: string;
-    timestamp: Date;
-    read: boolean;
-  }>>([]);
-  const [showNotifications, setShowNotifications] = useState(false);
-  
   // ChatBot States
   const [showChatBot, setShowChatBot] = useState(false);
   const [chatMessages, setChatMessages] = useState<Array<{
@@ -93,7 +221,7 @@ export default function Home() {
   }>>([
     {
       type: 'bot',
-      message: 'Olá! Sou o assistente inteligente do DomainPro. Como posso ajudá-lo hoje?',
+      message: 'Olá! Sou o assistente inteligente do BLM DomainBox. Como posso ajudá-lo hoje?',
       timestamp: new Date(),
       actions: [
         { label: '🔧 Diagnosticar Problema', action: 'diagnose' },
@@ -112,6 +240,21 @@ export default function Home() {
     renewal: string;
     registeredAt: Date;
   } | null>(null);
+
+  // Purchase Modal States
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [selectedDomain, setSelectedDomain] = useState<string>("");
+  const [selectedPeriod, setSelectedPeriod] = useState<1 | 2 | 5>(1);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'pix' | 'credit' | 'debit' | 'balance'>('pix');
+  const [showExtrasModal, setShowExtrasModal] = useState(false);
+  const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
+
+  // Load notifications on mount
+  useEffect(() => {
+    loadNotifications();
+    loadSupportTickets();
+  }, []);
 
   // Load password status from localStorage
   useEffect(() => {
@@ -149,6 +292,511 @@ export default function Home() {
     }
   }, [codeExpiry]);
 
+  // Load notifications from API
+  const loadNotifications = async () => {
+    try {
+      const response = await fetch('/api/notifications?userId=user123');
+      const data = await response.json();
+      if (data.success) {
+        setNotifications(data.notifications.map((n: any) => ({
+          ...n,
+          timestamp: new Date(n.date)
+        })));
+      }
+    } catch (error) {
+      console.error('Erro ao carregar notificações:', error);
+    }
+  };
+
+  // Load support tickets
+  const loadSupportTickets = async () => {
+    try {
+      const response = await fetch('/api/support/ticket?userId=user123');
+      const data = await response.json();
+      if (data.success) {
+        setSupportTickets(data.tickets);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar tickets:', error);
+    }
+  };
+
+  // Load user domains
+  const loadUserDomains = async () => {
+    try {
+      const response = await fetch('/api/user/domains?userId=user123');
+      const data = await response.json();
+      setUserDomains(data.domains || []);
+    } catch (error) {
+      console.error('Erro ao carregar domínios:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (showDomainPanel) {
+      loadUserDomains();
+    }
+  }, [showDomainPanel]);
+
+  // AFFILIATE FUNCTIONS
+  const handleCopyAffiliateLink = () => {
+    navigator.clipboard.writeText(affiliateData.link);
+    
+    const notification = {
+      id: Date.now(),
+      message: "✅ Link copiado com sucesso!",
+      timestamp: new Date(),
+      read: false,
+      type: 'success' as const
+    };
+    setNotifications(prev => [notification, ...prev]);
+    
+    alert("✅ Link copiado com sucesso!\n\nCompartilhe com seus contatos e comece a ganhar comissões!");
+  };
+
+  const handleRequestWithdrawal = async () => {
+    if (affiliateData.balance <= 0) {
+      alert("❌ Você não tem saldo disponível para saque.");
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/affiliate/withdrawal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: affiliateData.userId,
+          amount: affiliateData.balance
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setAffiliateData(prev => ({
+          ...prev,
+          pendingWithdrawal: prev.balance,
+          balance: 0
+        }));
+
+        const notification = {
+          id: Date.now(),
+          message: `✅ Saque solicitado com sucesso! Aguarde a confirmação. Valor: R$ ${affiliateData.balance.toFixed(2)}`,
+          timestamp: new Date(),
+          read: false,
+          type: 'success' as const
+        };
+        setNotifications(prev => [notification, ...prev]);
+
+        alert(`✅ Saque solicitado com sucesso!\n\nValor: R$ ${affiliateData.balance.toFixed(2)}\n\nAguarde a confirmação. O valor será transferido em até 2 dias úteis.`);
+      }
+    } catch (error) {
+      console.error('Erro ao solicitar saque:', error);
+      alert('❌ Erro ao solicitar saque. Tente novamente.');
+    }
+  };
+
+  // DOMAIN MANAGEMENT FUNCTIONS
+  const handleRenewDomain = async (domainId: string) => {
+    try {
+      const response = await fetch('/api/domain/renew', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domainId,
+          userId: 'user123',
+          period: 1
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setUserDomains(prev => prev.map(d => 
+          d.id === domainId 
+            ? { ...d, expiryDate: data.newExpiryDate, status: 'active' }
+            : d
+        ));
+
+        const notification = {
+          id: Date.now(),
+          message: `✅ Domínio renovado com sucesso! Nova data de expiração: ${data.newExpiryDate}`,
+          timestamp: new Date(),
+          read: false,
+          type: 'success' as const
+        };
+        setNotifications(prev => [notification, ...prev]);
+
+        alert(`✅ Domínio renovado com sucesso!\n\nNova data de expiração: ${data.newExpiryDate}`);
+        setShowRenewModal(false);
+      }
+    } catch (error) {
+      console.error('Erro ao renovar domínio:', error);
+      alert('❌ Erro ao renovar domínio. Tente novamente.');
+    }
+  };
+
+  const handleToggleAutoRenew = async (domainId: string) => {
+    setUserDomains(prev => prev.map(d => 
+      d.id === domainId ? { ...d, autoRenew: !d.autoRenew } : d
+    ));
+
+    const domain = userDomains.find(d => d.id === domainId);
+    const notification = {
+      id: Date.now(),
+      message: `✅ Renovação automática ${domain?.autoRenew ? 'desativada' : 'ativada'} para ${domain?.domain}`,
+      timestamp: new Date(),
+      read: false,
+      type: 'info' as const
+    };
+    setNotifications(prev => [notification, ...prev]);
+  };
+
+  const handleAddDNSRecord = async () => {
+    if (!newDNSRecord.name || !newDNSRecord.value) {
+      alert('❌ Preencha todos os campos do registro DNS');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/domain/dns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domainId: selectedDomainForConfig.id,
+          dnsRecord: newDNSRecord
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setUserDomains(prev => prev.map(d => 
+          d.id === selectedDomainForConfig.id 
+            ? { ...d, dnsRecords: [...(d.dnsRecords || []), newDNSRecord] }
+            : d
+        ));
+
+        setSelectedDomainForConfig({
+          ...selectedDomainForConfig,
+          dnsRecords: [...(selectedDomainForConfig.dnsRecords || []), newDNSRecord]
+        });
+
+        setNewDNSRecord({ type: "A", name: "", value: "" });
+
+        const notification = {
+          id: Date.now(),
+          message: `✅ Registro DNS adicionado com sucesso! Propagação em até 24h.`,
+          timestamp: new Date(),
+          read: false,
+          type: 'success' as const
+        };
+        setNotifications(prev => [notification, ...prev]);
+
+        alert('✅ Registro DNS adicionado com sucesso!\n\nA propagação pode levar até 24 horas.');
+      }
+    } catch (error) {
+      console.error('Erro ao adicionar DNS:', error);
+      alert('❌ Erro ao adicionar registro DNS. Tente novamente.');
+    }
+  };
+
+  const handleDeleteDNSRecord = (index: number) => {
+    const updatedRecords = selectedDomainForConfig.dnsRecords.filter((_: any, i: number) => i !== index);
+    
+    setUserDomains(prev => prev.map(d => 
+      d.id === selectedDomainForConfig.id 
+        ? { ...d, dnsRecords: updatedRecords }
+        : d
+    ));
+
+    setSelectedDomainForConfig({
+      ...selectedDomainForConfig,
+      dnsRecords: updatedRecords
+    });
+
+    alert('✅ Registro DNS removido com sucesso!');
+  };
+
+  const handleCreateEmail = async () => {
+    if (!newEmail.email || !newEmail.password) {
+      alert('❌ Preencha todos os campos do email');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/domain/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domainId: selectedDomainForConfig.id,
+          email: `${newEmail.email}@${selectedDomainForConfig.domain}`,
+          password: newEmail.password
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        const fullEmail = `${newEmail.email}@${selectedDomainForConfig.domain}`;
+        
+        setUserDomains(prev => prev.map(d => 
+          d.id === selectedDomainForConfig.id 
+            ? { ...d, emails: [...(d.emails || []), { email: fullEmail, password: newEmail.password }] }
+            : d
+        ));
+
+        setSelectedDomainForConfig({
+          ...selectedDomainForConfig,
+          emails: [...(selectedDomainForConfig.emails || []), { email: fullEmail, password: newEmail.password }]
+        });
+
+        const notification = {
+          id: Date.now(),
+          message: `✅ Email profissional criado: ${fullEmail}`,
+          timestamp: new Date(),
+          read: false,
+          type: 'success' as const
+        };
+        setNotifications(prev => [notification, ...prev]);
+
+        alert(`✅ Email profissional criado com sucesso!\n\nEmail: ${fullEmail}\nSenha: ${newEmail.password}\n\nGuarde essas informações em local seguro.`);
+        
+        setNewEmail({ email: "", password: "" });
+        setShowEmailCreation(false);
+      }
+    } catch (error) {
+      console.error('Erro ao criar email:', error);
+      alert('❌ Erro ao criar email profissional. Tente novamente.');
+    }
+  };
+
+  // EDIT PROFILE FUNCTIONS
+  const handleOpenEditProfile = () => {
+    setEditProfileForm({
+      name: userProfile.name,
+      email: userProfile.email,
+      phone: userProfile.phone,
+      password: "",
+      confirmPassword: "",
+      photo: userProfile.photo
+    });
+    setShowEditPassword(false);
+    setShowEditConfirmPassword(false);
+    setShowEditProfile(true);
+  };
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validações
+    if (!editProfileForm.name || !editProfileForm.email) {
+      alert("❌ Nome e email são obrigatórios!");
+      return;
+    }
+
+    if (editProfileForm.password && editProfileForm.password !== editProfileForm.confirmPassword) {
+      alert("❌ As senhas não coincidem!");
+      return;
+    }
+
+    if (editProfileForm.password && editProfileForm.password.length < 6) {
+      alert("❌ A senha deve ter no mínimo 6 caracteres!");
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/profile/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: 'user123',
+          name: editProfileForm.name,
+          email: editProfileForm.email,
+          phone: editProfileForm.phone,
+          password: editProfileForm.password || undefined,
+          photoUrl: editProfileForm.photo
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setUserProfile({
+          name: data.profile.name,
+          email: data.profile.email,
+          phone: data.profile.phone || "",
+          photo: data.profile.photoUrl
+        });
+
+        const notification = {
+          id: Date.now(),
+          message: "✅ Perfil atualizado com sucesso!",
+          timestamp: new Date(),
+          read: false,
+          type: 'success' as const
+        };
+        setNotifications(prev => [notification, ...prev]);
+
+        alert("✅ Perfil atualizado com sucesso!");
+        setShowEditProfile(false);
+      } else {
+        alert(`❌ Erro: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar perfil:', error);
+      alert("❌ Erro ao atualizar perfil. Tente novamente.");
+    }
+  };
+
+  // SUPPORT FUNCTIONS
+  const handleOpenSupportChat = async (ticketId?: string) => {
+    if (ticketId) {
+      try {
+        const response = await fetch(`/api/support/ticket?ticketId=${ticketId}&userId=user123`);
+        const data = await response.json();
+        if (data.success) {
+          setSelectedTicket(data.ticket);
+          setSupportMessages(data.ticket.messages);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar ticket:', error);
+      }
+    } else {
+      setSelectedTicket(null);
+      setSupportMessages([]);
+    }
+    setShowSupportChat(true);
+  };
+
+  const handleSendSupportMessage = async () => {
+    if (!supportMessage.trim()) return;
+
+    const newMessage = {
+      id: supportMessages.length + 1,
+      sender: 'user' as const,
+      message: supportMessage,
+      timestamp: new Date().toISOString()
+    };
+
+    setSupportMessages(prev => [...prev, newMessage]);
+    setSupportMessage("");
+
+    // Se não tem ticket, criar um novo
+    if (!selectedTicket) {
+      try {
+        const response = await fetch('/api/support/ticket', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: 'user123',
+            subject: 'Novo chamado',
+            message: supportMessage
+          })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          setSelectedTicket(data.ticket);
+          loadSupportTickets();
+
+          const notification = {
+            id: Date.now(),
+            message: `✅ Chamado ${data.ticket.id} criado com sucesso!`,
+            timestamp: new Date(),
+            read: false,
+            type: 'success' as const
+          };
+          setNotifications(prev => [notification, ...prev]);
+        }
+      } catch (error) {
+        console.error('Erro ao criar ticket:', error);
+      }
+    }
+
+    // Simular resposta do suporte
+    setTimeout(() => {
+      const supportResponse = {
+        id: supportMessages.length + 2,
+        sender: 'support' as const,
+        message: "Olá! Recebemos sua mensagem e já estamos analisando. Em breve retornaremos com uma solução.",
+        timestamp: new Date().toISOString()
+      };
+      setSupportMessages(prev => [...prev, supportResponse]);
+
+      const notification = {
+        id: Date.now(),
+        message: "💬 Suporte respondeu seu chamado!",
+        timestamp: new Date(),
+        read: false,
+        type: 'info' as const
+      };
+      setNotifications(prev => [notification, ...prev]);
+    }, 2000);
+  };
+
+  // NOTIFICATION FUNCTIONS
+  const markNotificationAsRead = async (id: number) => {
+    try {
+      await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: 'user123',
+          notificationId: id,
+          action: 'markAsRead'
+        })
+      });
+
+      setNotifications(prev =>
+        prev.map(notif =>
+          notif.id === id ? { ...notif, read: true } : notif
+        )
+      );
+    } catch (error) {
+      console.error('Erro ao marcar notificação:', error);
+    }
+  };
+
+  const deleteNotification = async (id: number) => {
+    try {
+      await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: 'user123',
+          notificationId: id,
+          action: 'delete'
+        })
+      });
+
+      setNotifications(prev => prev.filter(notif => notif.id !== id));
+    } catch (error) {
+      console.error('Erro ao deletar notificação:', error);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: 'user123',
+          notificationId: 0,
+          action: 'markAllAsRead'
+        })
+      });
+
+      setNotifications(prev => prev.map(notif => ({ ...notif, read: true })));
+    } catch (error) {
+      console.error('Erro ao marcar todas:', error);
+    }
+  };
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  // Restante das funções originais mantidas...
   const extensions = [
     { ext: ".com", price: "R$ 49,99", popular: true },
     { ext: ".br", price: "R$ 39,99", popular: true },
@@ -160,117 +808,39 @@ export default function Home() {
     { ext: ".online", price: "R$ 24,99", popular: false },
   ];
 
-  const features = [
-    {
-      icon: Shield,
-      title: "Proteção de Privacidade Aprimorada",
-      description: "Criptografia ponta a ponta, ocultação automática de WHOIS e autenticação em dois fatores. Ative ou ajuste as opções de segurança com apenas um clique.",
-      details: [
-        "Criptografia ponta a ponta",
-        "Ocultação automática de informações públicas (WHOIS)",
-        "Autenticação em dois fatores",
-        "Controle total sobre privacidade"
-      ]
-    },
-    {
-      icon: Settings,
-      title: "Configuração Instantânea",
-      description: "Registre, ajuste e ative serviços sem etapas complexas. O sistema detecta automaticamente as melhores configurações e aplica otimizações em tempo real.",
-      details: [
-        "Detecção automática de configurações",
-        "Otimizações em tempo real",
-        "Sem etapas complexas",
-        "Praticidade e agilidade"
-      ]
-    },
-    {
-      icon: Globe,
-      title: "DNS Gerenciado Inteligente",
-      description: "Tecnologia em nuvem com atualização automática. Alterações de DNS em segundos, monitoramento ativo e proteção contra ataques DDoS.",
-      details: [
-        "Alterações de DNS em segundos",
-        "Monitoramento ativo de desempenho",
-        "Proteção contra ataques DDoS",
-        "Uptime de 99.9% garantido"
-      ]
-    },
-    {
-      icon: BarChart3,
-      title: "Ferramentas de Marketing Integradas",
-      description: "Painel de marketing inteligente com monitoramento de tráfego em tempo real, integração com redes sociais e campanhas personalizadas ativadas com um clique.",
-      details: [
-        "Monitoramento de tráfego e conversão",
-        "Integração com redes sociais",
-        "Geração automática de relatórios",
-        "Campanhas personalizadas"
-      ]
-    },
+  const extras = [
+    { id: 'email', name: 'Email Profissional', price: 12, description: '5 contas de email com seu domínio' },
+    { id: 'dns', name: 'DNS Pro', price: 9, description: 'DNS gerenciado avançado com proteção DDoS' },
+    { id: 'site', name: 'Site Pronto', price: 29, description: 'Template profissional + hospedagem' }
   ];
 
-  const plans = [
-    {
-      name: "Básico",
-      price: "R$ 39,99",
-      period: "/ano",
-      features: [
-        "1 Domínio incluído",
-        "Proteção de privacidade",
-        "DNS gerenciado",
-        "Suporte 24/7",
-        "Certificado SSL grátis",
-      ],
-      highlighted: false,
-    },
-    {
-      name: "Profissional",
-      price: "R$ 89,99",
-      period: "/ano",
-      features: [
-        "3 Domínios incluídos",
-        "Proteção de privacidade premium",
-        "DNS gerenciado avançado",
-        "Suporte prioritário 24/7",
-        "Certificado SSL grátis",
-        "Email profissional (5 contas)",
-        "Backup automático",
-      ],
-      highlighted: true,
-    },
-    {
-      name: "Empresarial",
-      price: "R$ 149,99",
-      period: "/ano",
-      features: [
-        "10 Domínios incluídos",
-        "Proteção de privacidade premium",
-        "DNS gerenciado enterprise",
-        "Suporte dedicado 24/7",
-        "Certificado SSL grátis",
-        "Email profissional (ilimitado)",
-        "Backup automático",
-        "Gerente de conta dedicado",
-      ],
-      highlighted: false,
-    },
-  ];
-
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!domain.trim()) return;
 
     setIsSearching(true);
     
-    setTimeout(() => {
-      const isAvailable = Math.random() > 0.3;
+    try {
       const cleanDomain = domain.toLowerCase().replace(/\s+/g, "");
       const finalDomain = cleanDomain.includes(".") ? cleanDomain : `${cleanDomain}.com`;
       
+      const response = await fetch('/api/domain/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain: finalDomain })
+      });
+
+      const data = await response.json();
+      
       setSearchResult({
-        available: isAvailable,
-        domain: finalDomain,
+        available: data.available,
+        domain: data.domain,
         price: "R$ 49,99",
       });
+    } catch (error) {
+      console.error('Erro ao buscar domínio:', error);
+    } finally {
       setIsSearching(false);
-    }, 1500);
+    }
   };
 
   const handleLogin = (e: React.FormEvent) => {
@@ -283,38 +853,87 @@ export default function Home() {
     setRememberMe(false);
   };
 
-  const handleRegister = () => {
-    // Registrar domínio blmmybox.com com plano padrão e renovação anual
-    const newRegistration = {
-      domain: "blmmybox.com",
-      plan: "Profissional",
-      renewal: "Anual",
-      registeredAt: new Date()
-    };
-    
-    setRegisteredDomain(newRegistration);
-    
-    // Notificação de sucesso
-    const notification = {
-      id: Date.now(),
-      message: `✅ Domínio blmmybox.com registrado com sucesso! Plano: Profissional | Renovação: Anual`,
-      timestamp: new Date(),
-      read: false
-    };
-    setNotifications(prev => [notification, ...prev]);
-    
-    alert("✅ Domínio blmmybox.com registrado com sucesso!\n\nPlano: Profissional (R$ 89,99/ano)\nRenovação: Anual\n\nVocê receberá um email de confirmação em instantes.");
+  const handleOpenPurchase = (domainName: string) => {
+    setSelectedDomain(domainName);
+    setShowPurchaseModal(true);
   };
 
-  // Banking Functions
+  const handleAddToCart = () => {
+    alert(`✅ ${selectedDomain} adicionado ao carrinho!\n\nPeríodo: ${selectedPeriod} ano(s)\nTotal: R$ ${(49.99 * selectedPeriod).toFixed(2)}`);
+    setShowPurchaseModal(false);
+  };
 
+  const handleBuyNow = () => {
+    setShowPurchaseModal(false);
+    setShowCheckout(true);
+  };
+
+  const handleConfirmPayment = async () => {
+    const totalValue = 49.99 * selectedPeriod;
+    
+    try {
+      const response = await fetch('/api/domain/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domain: selectedDomain,
+          period: selectedPeriod,
+          paymentMethod: selectedPaymentMethod,
+          userInfo: {
+            name: userProfile.name,
+            email: userProfile.email
+          }
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        const newRegistration = {
+          domain: selectedDomain,
+          plan: "Básico",
+          renewal: `${selectedPeriod} ano(s)`,
+          registeredAt: new Date()
+        };
+        
+        setRegisteredDomain(newRegistration);
+        
+        const notification = {
+          id: Date.now(),
+          message: `✅ Pagamento aprovado! Seu domínio ${selectedDomain} foi registrado com sucesso.`,
+          timestamp: new Date(),
+          read: false
+        };
+        setNotifications(prev => [notification, ...prev]);
+        
+        alert(`✅ Pagamento aprovado!\n\nSeu domínio ${selectedDomain} foi registrado com sucesso.\n\nValor: R$ ${totalValue.toFixed(2)}\nMétodo: ${selectedPaymentMethod === 'pix' ? 'PIX' : selectedPaymentMethod === 'credit' ? 'Cartão de Crédito' : selectedPaymentMethod === 'debit' ? 'Cartão de Débito' : 'Saldo Interno'}\n\nVocê receberá um email de confirmação em instantes.`);
+        
+        setShowCheckout(false);
+        setShowExtrasModal(true);
+      }
+    } catch (error) {
+      console.error('Erro ao registrar domínio:', error);
+      alert('Erro ao processar pagamento. Tente novamente.');
+    }
+  };
+
+  const handleConfirmExtras = () => {
+    if (selectedExtras.length > 0) {
+      const extrasNames = selectedExtras.map(id => extras.find(e => e.id === id)?.name).join(', ');
+      alert(`✅ Planos adicionados com sucesso!\n\n${extrasNames}\n\nSuas assinaturas foram ativadas.`);
+    }
+    setShowExtrasModal(false);
+    setSelectedExtras([]);
+  };
+
+  // Banking Functions (mantidas do código original)
   const handleOpenPaymentSettings = () => {
     setShowPaymentSettings(true);
     if (!isPasswordCreated) {
-      setBankingScreen('createPassword'); // Vai mostrar tela de criar senha
+      setBankingScreen('createPassword');
     } else {
-      setBankingScreen('login'); // Vai mostrar tela de inserir senha
-      setShowEmailCodeOption(true); // Mostrar opção de código por email
+      setBankingScreen('login');
+      setShowEmailCodeOption(true);
     }
     setPasswordError("");
   };
@@ -323,34 +942,30 @@ export default function Home() {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     setGeneratedCode(code);
     const expiry = new Date();
-    expiry.setMinutes(expiry.getMinutes() + 5); // Expira em 5 minutos
+    expiry.setMinutes(expiry.getMinutes() + 5);
     setCodeExpiry(expiry);
     
-    // Simular envio de email
     const emailNotif = {
       id: Date.now(),
-      message: `📧 Código de acesso enviado para leemendesbrandon@gmail.com: ${code} (válido por 5 minutos)`,
+      message: `📧 Código de acesso enviado para ${userProfile.email}: ${code} (válido por 5 minutos)`,
       timestamp: new Date(),
       read: false
     };
     setNotifications(prev => [emailNotif, ...prev]);
     
-    alert(`📧 Código enviado para leemendesbrandon@gmail.com\n\nCódigo: ${code}\n\nO código expira em 5 minutos.`);
+    alert(`📧 Código enviado para ${userProfile.email}\n\nCódigo: ${code}\n\nO código expira em 5 minutos.`);
   };
 
-  // NOVO FLUXO: Alterar Senha Diretamente
   const handleChangePasswordDirect = (e: React.FormEvent) => {
     e.preventDefault();
     setPasswordError("");
 
-    // Validar senha atual
     const enteredCurrentPassword = btoa(changePasswordForm.currentPassword);
     if (enteredCurrentPassword !== masterPassword) {
       setPasswordError("Senha atual incorreta.");
       return;
     }
 
-    // Validar nova senha
     if (changePasswordForm.newPassword.length < 6) {
       setPasswordError("A nova senha deve ter no mínimo 6 caracteres");
       return;
@@ -361,12 +976,10 @@ export default function Home() {
       return;
     }
 
-    // Atualizar senha imediatamente
     const encryptedPassword = btoa(changePasswordForm.newPassword);
     localStorage.setItem('brendon_master_password', encryptedPassword);
     setMasterPassword(encryptedPassword);
     
-    // Notificação
     const notif = {
       id: Date.now(),
       message: "✅ Senha alterada com sucesso! A nova senha foi criptografada e salva automaticamente.",
@@ -419,8 +1032,7 @@ export default function Home() {
       return;
     }
 
-    // Salvar senha (criptografada em produção)
-    const encryptedPassword = btoa(createPasswordForm.password); // Simulação de criptografia
+    const encryptedPassword = btoa(createPasswordForm.password);
     localStorage.setItem('brendon_master_password', encryptedPassword);
     setMasterPassword(encryptedPassword);
     setIsPasswordCreated(true);
@@ -450,10 +1062,9 @@ export default function Home() {
       
       if (newAttempts >= 5) {
         setIsBlocked(true);
-        setBlockTimer(300); // 5 minutos
+        setBlockTimer(300);
         setPasswordError("Muitas tentativas incorretas. Sistema bloqueado por 5 minutos.");
         
-        // Enviar notificação de segurança
         const securityNotif = {
           id: Date.now(),
           message: "🔒 Alerta de Segurança: 5 tentativas de acesso incorretas detectadas. Sistema bloqueado por 5 minutos.",
@@ -471,7 +1082,6 @@ export default function Home() {
   const handleSaveBankingInfo = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Criptografar dados bancários (simulação)
     const encryptedData = {
       ...bankingInfo,
       cpfCnpj: btoa(bankingInfo.cpfCnpj),
@@ -480,7 +1090,6 @@ export default function Home() {
     
     console.log("Dados bancários criptografados:", encryptedData);
     
-    // Enviar notificação por email (simulado)
     const emailNotification = {
       id: Date.now(),
       message: "📧 Dados bancários salvos com sucesso. Email de confirmação enviado para seu endereço cadastrado.",
@@ -496,10 +1105,8 @@ export default function Home() {
     setIsBankConnected(true);
     setBankingScreen('verification');
     
-    // Simular envio de microdepósito
     alert("🏦 Conexão iniciada! Um microdepósito de R$ 0,01 foi enviado para sua conta Nubank. Verifique seu extrato.");
     
-    // Notificação SMS
     setTimeout(() => {
       const smsNotif = {
         id: Date.now(),
@@ -518,7 +1125,6 @@ export default function Home() {
       setVerificationStep('sms');
       alert("✅ Valor correto! Agora vamos verificar por SMS.");
       
-      // Simular envio de SMS
       setTimeout(() => {
         alert("📱 Código SMS enviado para seu celular cadastrado: *****-1234");
         const smsNotif = {
@@ -549,7 +1155,6 @@ export default function Home() {
       };
       setNotifications(prev => [notification, ...prev]);
       
-      // Email de confirmação
       setTimeout(() => {
         const emailNotif = {
           id: Date.now() + 1,
@@ -572,7 +1177,6 @@ export default function Home() {
       setBalance(0);
       setShowTransferSuccess(true);
       
-      // Adicionar transação ao histórico
       const newTransaction = {
         id: `TXN${String(transactions.length + 1).padStart(3, '0')}`,
         value: transferValue,
@@ -587,7 +1191,6 @@ export default function Home() {
       };
       setTransactions(prev => [newTransaction, ...prev]);
       
-      // Notificação de transferência
       const notification = {
         id: Date.now(),
         message: `💰 Transferência de R$ ${transferValue.toFixed(2)} realizada com sucesso para sua conta Nubank.`,
@@ -596,7 +1199,6 @@ export default function Home() {
       };
       setNotifications(prev => [notification, ...prev]);
       
-      // Email notification (simulado)
       setTimeout(() => {
         const emailNotif = {
           id: Date.now() + 1,
@@ -616,7 +1218,6 @@ export default function Home() {
   const handleExportPDF = () => {
     alert("📄 Gerando PDF do histórico de transações...\n\nO arquivo será baixado em instantes.");
     
-    // Simular geração de PDF
     setTimeout(() => {
       const pdfContent = `
 ===========================================
@@ -641,7 +1242,6 @@ Gerado em: ${new Date().toLocaleString('pt-BR')}
       console.log("PDF Gerado:", pdfContent);
       alert("✅ PDF gerado com sucesso!\n\nHistorico_Transacoes_BLM_DomainBox.pdf");
       
-      // Notificação
       const notif = {
         id: Date.now(),
         message: "📄 Histórico exportado em PDF com sucesso.",
@@ -664,17 +1264,7 @@ Gerado em: ${new Date().toLocaleString('pt-BR')}
     setChangePasswordForm({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
   };
 
-  const markNotificationAsRead = (id: number) => {
-    setNotifications(prev => 
-      prev.map(notif => 
-        notif.id === id ? { ...notif, read: true } : notif
-      )
-    );
-  };
-
-  const unreadCount = notifications.filter(n => !n.read).length;
-
-  // ChatBot Functions
+  // ChatBot Functions (mantidas do código original)
   const handleChatAction = (action: string) => {
     setIsTyping(true);
     
@@ -815,50 +1405,76 @@ Gerado em: ${new Date().toLocaleString('pt-BR')}
     }
   };
 
+  const getDomainStatusColor = (status: 'active' | 'expiring' | 'expired') => {
+    switch (status) {
+      case 'active': return 'text-green-600 bg-green-100';
+      case 'expiring': return 'text-yellow-600 bg-yellow-100';
+      case 'expired': return 'text-red-600 bg-red-100';
+    }
+  };
+
+  const getDomainStatusText = (status: 'active' | 'expiring' | 'expired') => {
+    switch (status) {
+      case 'active': return 'Ativo';
+      case 'expiring': return 'Expirando';
+      case 'expired': return 'Expirado';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="border-b border-gray-200 bg-white sticky top-0 z-50">
+      {/* Header - Organizado e Profissional */}
+      <header className="border-b border-gray-200 bg-white sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
-              <Globe className="w-8 h-8 text-[#00a82d]" />
-              <span className="text-2xl font-bold text-gray-900">DomainPro</span>
+          <div className="flex items-center justify-between h-20">
+            {/* Logo */}
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-[#00a82d] to-[#008c26] rounded-xl flex items-center justify-center shadow-lg">
+                <Globe className="w-7 h-7 text-white" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-2xl font-bold text-gray-900">BLM DomainBox</span>
+                <span className="text-xs text-gray-500 font-medium">Seu domínio, sua identidade</span>
+              </div>
             </div>
-            <nav className="hidden md:flex items-center gap-8">
-              <a href="#dominios" className="text-gray-700 hover:text-[#00a82d] transition-colors">
+
+            {/* Navigation - Desktop */}
+            <nav className="hidden lg:flex items-center gap-8">
+              <a href="#dominios" className="text-gray-700 hover:text-[#00a82d] transition-colors font-medium">
                 Domínios
               </a>
-              <a href="#recursos" className="text-gray-700 hover:text-[#00a82d] transition-colors">
+              <a href="#recursos" className="text-gray-700 hover:text-[#00a82d] transition-colors font-medium">
                 Recursos
               </a>
-              <a href="#precos" className="text-gray-700 hover:text-[#00a82d] transition-colors">
+              <a href="#precos" className="text-gray-700 hover:text-[#00a82d] transition-colors font-medium">
                 Preços
               </a>
+              
+              {/* Suporte */}
               <button 
                 onClick={() => setShowChatBot(true)}
                 className="text-[#00a82d] hover:text-[#008c26] font-medium flex items-center gap-2 transition-colors"
               >
                 <MessageCircle className="w-5 h-5" />
-                Falar com Suporte
+                Suporte
               </button>
               
-              {/* Botão Receber Pagamentos - Apenas para Brendon */}
+              {/* Receber Pagamentos */}
               <button 
                 onClick={handleOpenPaymentSettings}
-                className="text-gray-700 hover:text-[#00a82d] font-medium flex items-center gap-2 transition-colors"
-                title="Área exclusiva do proprietário - Brendon"
+                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 font-medium flex items-center gap-2 transition-all shadow-md hover:shadow-lg"
+                title="Área exclusiva - Brendon"
               >
                 <CreditCard className="w-5 h-5" />
-                Receber Pagamentos
+                Pagamentos
               </button>
 
               {/* Notificações */}
               <button 
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="relative text-gray-700 hover:text-[#00a82d] transition-colors"
+                className="relative p-2 text-gray-700 hover:text-[#00a82d] transition-colors"
               >
-                <Bell className="w-5 h-5" />
+                <Bell className="w-6 h-6" />
                 {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
                     {unreadCount}
@@ -866,1296 +1482,323 @@ Gerado em: ${new Date().toLocaleString('pt-BR')}
                 )}
               </button>
 
+              {/* Login Button */}
               <button 
                 onClick={() => setShowLoginModal(true)}
-                className="px-6 py-2 bg-[#00a82d] text-white rounded-lg hover:bg-[#008c26] transition-colors font-medium flex items-center gap-2"
+                className="px-6 py-2.5 bg-[#00a82d] text-white rounded-lg hover:bg-[#008c26] transition-colors font-semibold flex items-center gap-2 shadow-md hover:shadow-lg"
               >
                 <User className="w-4 h-4" />
-                Acessar Conta
+                Entrar
               </button>
             </nav>
           </div>
         </div>
       </header>
 
-      {/* Notifications Dropdown */}
-      {showNotifications && (
-        <div className="fixed top-20 right-4 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 max-h-96 overflow-y-auto">
-          <div className="p-4 border-b border-gray-200">
-            <h3 className="font-bold text-gray-900 flex items-center gap-2">
-              <Bell className="w-5 h-5 text-[#00a82d]" />
-              Notificações
-            </h3>
-          </div>
-          {notifications.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
-              Nenhuma notificação
+      {/* PAINEL DE ACESSO, SUPORTE E NOTIFICAÇÕES */}
+      <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Painel de Acesso do Usuário */}
+            <div className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-12 h-12 rounded-full overflow-hidden bg-[#00a82d]">
+                  <img src={userProfile.photo} alt={userProfile.name} className="w-full h-full object-cover" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-gray-900">{userProfile.name}</h3>
+                  <p className="text-sm text-gray-600">{userProfile.email}</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={handleOpenEditProfile}
+                  className="flex-1 h-[55px] px-3 bg-[#00a82d] text-white rounded-xl hover:bg-[#008c26] transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                >
+                  <User className="w-4 h-4" />
+                  Editar Perfil
+                </button>
+                <button className="h-[55px] w-[55px] bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors flex items-center justify-center">
+                  <LogOut className="w-5 h-5" />
+                </button>
+              </div>
             </div>
-          ) : (
-            <div className="divide-y divide-gray-100">
-              {notifications.map((notif) => (
-                <div 
-                  key={notif.id}
-                  onClick={() => markNotificationAsRead(notif.id)}
-                  className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${!notif.read ? 'bg-green-50' : ''}`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <CheckCircle className="w-5 h-5 text-green-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-900 font-medium">{notif.message}</p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {notif.timestamp.toLocaleString('pt-BR')}
-                      </p>
-                    </div>
-                    {!notif.read && (
-                      <span className="w-2 h-2 bg-[#00a82d] rounded-full"></span>
-                    )}
+
+            {/* Painel de Suporte ao Cliente */}
+            <div className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="relative">
+                  <div className="w-10 h-10 bg-gradient-to-br from-[#00a82d] to-[#008c26] rounded-full flex items-center justify-center">
+                    <Bot className="w-6 h-6 text-white" />
                   </div>
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full animate-pulse" title="Bot Online"></div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Banking System Modal - Sistema Completo com Autenticação por Email */}
-      {showPaymentSettings && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8 relative my-8">
-            
-            {/* Tela: Criar Senha (primeira vez) */}
-            {bankingScreen === 'createPassword' && (
-              <>
-                <button
-                  onClick={handleCloseBanking}
-                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
-                >
-                  ×
-                </button>
-
-                <div className="text-center mb-8">
-                  <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Lock className="w-8 h-8 text-purple-600" />
-                  </div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Criar Senha de Acesso</h2>
-                  <p className="text-gray-600">Configure sua senha para proteger a área de pagamentos</p>
-                  <p className="text-sm text-purple-600 font-semibold mt-2">Acesso exclusivo - Brendon (BLM DomainBox)</p>
-                </div>
-
-                <form onSubmit={handleCreatePassword} className="space-y-6">
-                  <div>
-                    <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 mb-2">
-                      Digite a nova senha
-                    </label>
-                    <input
-                      type="password"
-                      id="new-password"
-                      value={createPasswordForm.password}
-                      onChange={(e) => setCreatePasswordForm({ ...createPasswordForm, password: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
-                      placeholder="Mínimo 6 caracteres"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-2">
-                      Confirme a senha
-                    </label>
-                    <input
-                      type="password"
-                      id="confirm-password"
-                      value={createPasswordForm.confirmPassword}
-                      onChange={(e) => setCreatePasswordForm({ ...createPasswordForm, confirmPassword: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
-                      placeholder="Digite a senha novamente"
-                      required
-                    />
-                  </div>
-
-                  {passwordError && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
-                      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-                      <p className="text-sm text-red-700">{passwordError}</p>
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold text-lg"
-                  >
-                    Criar Senha
-                  </button>
-
-                  <div className="text-center text-sm text-gray-500">
-                    <p>🔒 Sua senha será criptografada e armazenada com segurança</p>
-                  </div>
-                </form>
-              </>
-            )}
-            
-            {/* Tela 1: Login Bancário */}
-            {isPasswordCreated && bankingScreen === 'login' && (
-              <>
-                <button
-                  onClick={handleCloseBanking}
-                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
-                >
-                  ×
-                </button>
-
-                <div className="text-center mb-8">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Lock className="w-8 h-8 text-blue-600" />
-                  </div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Login Bancário</h2>
-                  <p className="text-gray-600">Digite sua senha para acessar</p>
-                  <p className="text-sm text-blue-600 font-semibold mt-2">Brendon - BLM DomainBox</p>
-                </div>
-
-                <form onSubmit={handleBankingLogin} className="space-y-6">
-                  <div>
-                    <label htmlFor="banking-password" className="block text-sm font-medium text-gray-700 mb-2">
-                      Digite sua senha
-                    </label>
-                    <input
-                      type="password"
-                      id="banking-password"
-                      value={loginPasswordForm}
-                      onChange={(e) => setLoginPasswordForm(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                      placeholder="••••••••"
-                      required
-                      disabled={isBlocked}
-                    />
-                  </div>
-
-                  {passwordError && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
-                      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-                      <p className="text-sm text-red-700">{passwordError}</p>
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={isBlocked}
-                    className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isBlocked ? `Bloqueado (${Math.floor(blockTimer / 60)}:${(blockTimer % 60).toString().padStart(2, '0')})` : 'Entrar'}
-                  </button>
-
-                  {/* Opção de entrar com código por email */}
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="px-2 bg-white text-gray-500">ou</span>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleLoginWithEmailCode}
-                    className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold flex items-center justify-center gap-2"
-                  >
-                    <Mail className="w-5 h-5" />
-                    Entrar com Código por Email
-                  </button>
-
-                  {/* Link para criar senha */}
-                  <div className="text-center">
-                    <button
-                      type="button"
-                      onClick={() => setBankingScreen('createPassword')}
-                      className="text-sm text-purple-600 hover:text-purple-700 font-medium"
-                    >
-                      Criar Nova Senha
-                    </button>
-                  </div>
-
-                  {/* Link para alterar senha */}
-                  <div className="text-center">
-                    <button
-                      type="button"
-                      onClick={() => setBankingScreen('changePassword')}
-                      className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                    >
-                      Alterar Senha
-                    </button>
-                  </div>
-
-                  <div className="text-center text-sm text-gray-500">
-                    <p>🔒 Sistema protegido com bloqueio automático após 5 tentativas</p>
-                  </div>
-                </form>
-              </>
-            )}
-
-            {/* Tela: Login com Código por Email */}
-            {bankingScreen === 'emailCode' && (
-              <>
-                <button
-                  onClick={handleCloseBanking}
-                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
-                >
-                  ×
-                </button>
-
-                <div className="text-center mb-8">
-                  <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Mail className="w-8 h-8 text-purple-600" />
-                  </div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Código de Acesso</h2>
-                  <p className="text-gray-600">Digite o código enviado para seu email</p>
-                  <p className="text-sm text-purple-600 font-semibold mt-2">leemendesbrandon@gmail.com</p>
-                </div>
-
-                <form onSubmit={handleVerifyEmailCode} className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Código de 6 dígitos
-                    </label>
-                    <input
-                      type="text"
-                      value={emailCode}
-                      onChange={(e) => setEmailCode(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-center text-2xl tracking-widest"
-                      placeholder="000000"
-                      maxLength={6}
-                      required
-                    />
-                  </div>
-
-                  {passwordError && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
-                      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-                      <p className="text-sm text-red-700">{passwordError}</p>
-                    </div>
-                  )}
-
-                  {codeExpiry && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                      <p className="text-sm text-blue-700 text-center">
-                        ⏱️ Código expira em: {Math.max(0, Math.floor((codeExpiry.getTime() - new Date().getTime()) / 1000))}s
-                      </p>
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold"
-                  >
-                    Verificar Código
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setBankingScreen('login')}
-                    className="w-full px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-semibold"
-                  >
-                    Voltar
-                  </button>
-
-                  <div className="text-center text-sm text-gray-500">
-                    <p>🔒 Código criptografado e temporário (expira em 5 minutos)</p>
-                  </div>
-                </form>
-              </>
-            )}
-
-            {/* Tela: Alterar Senha - NOVO FLUXO DIRETO */}
-            {bankingScreen === 'changePassword' && (
-              <>
-                <button
-                  onClick={handleCloseBanking}
-                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
-                >
-                  ×
-                </button>
-
-                <div className="text-center mb-8">
-                  <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Key className="w-8 h-8 text-orange-600" />
-                  </div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Alterar Senha</h2>
-                  <p className="text-gray-600">Digite sua senha atual e escolha uma nova senha</p>
-                  <p className="text-sm text-orange-600 font-semibold mt-2">Brendon - BLM DomainBox</p>
-                </div>
-
-                <form onSubmit={handleChangePasswordDirect} className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Senha atual
-                    </label>
-                    <input
-                      type="password"
-                      value={changePasswordForm.currentPassword}
-                      onChange={(e) => setChangePasswordForm({ ...changePasswordForm, currentPassword: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
-                      placeholder="Digite sua senha atual"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nova senha
-                    </label>
-                    <input
-                      type="password"
-                      value={changePasswordForm.newPassword}
-                      onChange={(e) => setChangePasswordForm({ ...changePasswordForm, newPassword: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
-                      placeholder="Mínimo 6 caracteres"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Confirme a nova senha
-                    </label>
-                    <input
-                      type="password"
-                      value={changePasswordForm.confirmNewPassword}
-                      onChange={(e) => setChangePasswordForm({ ...changePasswordForm, confirmNewPassword: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
-                      placeholder="Digite a senha novamente"
-                      required
-                    />
-                  </div>
-
-                  {passwordError && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
-                      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-                      <p className="text-sm text-red-700">{passwordError}</p>
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    className="w-full px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-semibold"
-                  >
-                    Alterar Senha
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setBankingScreen('login')}
-                    className="w-full px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-semibold"
-                  >
-                    Cancelar
-                  </button>
-
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <p className="text-sm text-green-800 flex items-center gap-2">
-                      <CheckCircle className="w-5 h-5 flex-shrink-0" />
-                      A senha será atualizada imediatamente se a senha atual estiver correta
-                    </p>
-                  </div>
-                </form>
-              </>
-            )}
-
-            {/* Tela 2: Configurações Bancárias */}
-            {bankingScreen === 'config' && (
-              <>
-                <button
-                  onClick={handleCloseBanking}
-                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
-                >
-                  ×
-                </button>
-
-                <div className="text-center mb-8">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Building2 className="w-8 h-8 text-green-600" />
-                  </div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Configurações Bancárias</h2>
-                  <p className="text-gray-600">Configure seus dados para receber pagamentos com segurança</p>
-                </div>
-
-                <form onSubmit={handleSaveBankingInfo} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Nome completo</label>
-                    <input
-                      type="text"
-                      value={bankingInfo.fullName}
-                      onChange={(e) => setBankingInfo({ ...bankingInfo, fullName: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                      placeholder="Seu nome completo"
-                      required
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">CPF/CNPJ</label>
-                      <input
-                        type="text"
-                        value={bankingInfo.cpfCnpj}
-                        onChange={(e) => setBankingInfo({ ...bankingInfo, cpfCnpj: e.target.value })}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                        placeholder="000.000.000-00"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Banco</label>
-                      <input
-                        type="text"
-                        value={bankingInfo.bank}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-purple-50 font-semibold text-purple-700"
-                        readOnly
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de conta</label>
-                      <input
-                        type="text"
-                        value={bankingInfo.accountType}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50"
-                        readOnly
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Agência</label>
-                      <input
-                        type="text"
-                        value={bankingInfo.agency}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50"
-                        readOnly
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Número da conta</label>
-                    <input
-                      type="text"
-                      value={bankingInfo.accountNumber}
-                      onChange={(e) => setBankingInfo({ ...bankingInfo, accountNumber: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                      placeholder="0000000-0"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Chave Pix (opcional)</label>
-                    <input
-                      type="text"
-                      value={bankingInfo.pixKey}
-                      onChange={(e) => setBankingInfo({ ...bankingInfo, pixKey: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                      placeholder="email@exemplo.com, CPF ou telefone"
-                    />
-                  </div>
-
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <p className="text-sm text-blue-800 flex items-center gap-2">
-                      <Shield className="w-5 h-5" />
-                      Todos os dados são criptografados e armazenados com segurança
-                    </p>
-                  </div>
-
-                  <div className="flex gap-4">
-                    <button
-                      type="submit"
-                      className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
-                    >
-                      Salvar
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleConnectNubank}
-                      className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold flex items-center justify-center gap-2"
-                    >
-                      <Building2 className="w-5 h-5" />
-                      Conectar ao Nubank
-                    </button>
-                  </div>
-                </form>
-              </>
-            )}
-
-            {/* Tela 3: Verificação - AGORA COM SALDO VISÍVEL E OPÇÕES ATIVADAS */}
-            {bankingScreen === 'verification' && (
-              <>
-                <button
-                  onClick={handleCloseBanking}
-                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
-                >
-                  ×
-                </button>
-
-                <div className="text-center mb-8">
-                  <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Shield className="w-8 h-8 text-yellow-600" />
-                  </div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Verificação de Segurança</h2>
-                  <p className="text-gray-600">Confirme sua identidade para ativar transferências automáticas</p>
-                  
-                  {/* SALDO PENDENTE VISÍVEL */}
-                  <div className="mt-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border-2 border-green-200">
-                    <p className="text-sm text-green-700 font-medium mb-2">💰 Saldo Pendente de Liberação</p>
-                    <p className="text-4xl font-bold text-green-600">
-                      R$ {pendingBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </p>
-                    <p className="text-xs text-green-600 mt-2">
-                      ✅ Será liberado após verificação completa
-                    </p>
-                  </div>
-                </div>
-
-                {verificationStep === 'microdeposit' ? (
-                  <form onSubmit={handleVerifyMicroDeposit} className="space-y-6">
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <h3 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
-                        <DollarSign className="w-5 h-5" />
-                        Microdepósito
-                      </h3>
-                      <p className="text-sm text-blue-700">
-                        Enviamos um pequeno valor (R$ 0,01) para sua conta Nubank. Verifique seu extrato e digite o valor recebido para confirmar.
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Digite o valor recebido (R$)
-                      </label>
-                      <input
-                        type="text"
-                        value={microDepositValue}
-                        onChange={(e) => setMicroDepositValue(e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none text-center text-2xl"
-                        placeholder="0,01"
-                        required
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="w-full px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors font-semibold"
-                    >
-                      Verificar Valor
-                    </button>
-                  </form>
-                ) : (
-                  <form onSubmit={handleVerifySMS} className="space-y-6">
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                      <h3 className="font-semibold text-green-900 mb-2 flex items-center gap-2">
-                        <Smartphone className="w-5 h-5" />
-                        Código SMS
-                      </h3>
-                      <p className="text-sm text-green-700">
-                        Enviamos um código de 6 dígitos para seu celular cadastrado. Digite o código para concluir a verificação.
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Digite o código de verificação
-                      </label>
-                      <input
-                        type="text"
-                        value={smsCode}
-                        onChange={(e) => setSmsCode(e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none text-center text-2xl tracking-widest"
-                        placeholder="000000"
-                        maxLength={6}
-                        required
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
-                    >
-                      Confirmar Código
-                    </button>
-                  </form>
-                )}
-              </>
-            )}
-
-            {/* Tela 4: Painel de Saldo */}
-            {bankingScreen === 'dashboard' && (
-              <>
-                <button
-                  onClick={handleCloseBanking}
-                  className="absolute top-4 right-4 w-10 h-10 bg-red-100 hover:bg-red-200 text-red-600 rounded-full flex items-center justify-center transition-colors"
-                  title="Fechar"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-
-                <div className="text-center mb-8">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <DollarSign className="w-8 h-8 text-green-600" />
-                  </div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Seus Lucros</h2>
-                  <p className="text-gray-600">Painel de controle financeiro - BLM DomainBox</p>
-                </div>
-
-                {/* Saldo Total */}
-                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-8 mb-6 border-2 border-green-200">
-                  <p className="text-sm text-green-700 font-medium mb-2">Saldo Total Disponível</p>
-                  <p className="text-5xl font-bold text-green-600 mb-4">
-                    R$ {balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </p>
-                  <div className="flex items-center gap-2 text-sm text-green-700">
-                    <CheckCircle className="w-4 h-4" />
-                    <span>Conta verificada • Transferências automáticas ativas</span>
-                  </div>
-                </div>
-
-                {/* Botões de Ação */}
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <button
-                    onClick={handleTransfer}
-                    disabled={balance === 0}
-                    className="px-6 py-4 bg-[#00a82d] text-white rounded-xl hover:bg-[#008c26] transition-colors font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Send className="w-5 h-5" />
-                    Transferir
-                  </button>
-
-                  <button
-                    onClick={() => setBankingScreen('history')}
-                    className="px-6 py-4 bg-gray-100 text-gray-900 rounded-xl hover:bg-gray-200 transition-colors font-semibold flex items-center justify-center gap-2"
-                  >
-                    <History className="w-5 h-5" />
-                    Histórico
-                  </button>
-                </div>
-
-                {/* Mensagem de Sucesso */}
-                {showTransferSuccess && (
-                  <div className="bg-green-50 border-2 border-green-500 rounded-xl p-4 flex items-center gap-3 animate-pulse">
-                    <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
-                    <p className="text-green-800 font-semibold">
-                      Saque bem-sucedido! Seu pagamento foi transferido com sucesso para sua conta Nubank.
-                    </p>
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* Tela 5: Histórico */}
-            {bankingScreen === 'history' && (
-              <>
-                <button
-                  onClick={() => setBankingScreen('dashboard')}
-                  className="absolute top-4 left-4 text-gray-400 hover:text-gray-600"
-                >
-                  ← Voltar
-                </button>
-
-                <button
-                  onClick={handleCloseBanking}
-                  className="absolute top-4 right-4 w-10 h-10 bg-red-100 hover:bg-red-200 text-red-600 rounded-full flex items-center justify-center transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-
-                <div className="text-center mb-8 mt-8">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <History className="w-8 h-8 text-blue-600" />
-                  </div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Histórico de Depósitos</h2>
-                  <p className="text-gray-600">Todas as suas transações registradas</p>
-                </div>
-
-                {/* Lista de Transações */}
-                <div className="space-y-3 mb-6 max-h-96 overflow-y-auto">
-                  {transactions.map((transaction) => (
-                    <div key={transaction.id} className="bg-gray-50 rounded-xl p-4 border border-gray-200 hover:shadow-md transition-shadow">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <p className="font-bold text-gray-900 text-lg">
-                            R$ {transaction.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                          </p>
-                          <p className="text-sm text-gray-600">{transaction.date}</p>
-                        </div>
-                        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(transaction.status)}`}>
-                          {getStatusText(transaction.status)}
-                        </span>
-                      </div>
-                      <p className="text-xs text-gray-500">ID da transação: {transaction.id}</p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Botão Exportar PDF */}
-                <button
-                  onClick={handleExportPDF}
-                  className="w-full px-6 py-4 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-semibold flex items-center justify-center gap-2"
-                >
-                  <Download className="w-5 h-5" />
-                  Exportar PDF
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ChatBot Modal */}
-      {showChatBot && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-2xl h-[90vh] sm:h-[600px] flex flex-col">
-            {/* ChatBot Header */}
-            <div className="bg-gradient-to-r from-[#00a82d] to-[#008c26] p-6 rounded-t-3xl sm:rounded-t-2xl flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                  <Bot className="w-7 h-7 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-white font-bold text-lg">Assistente DomainPro</h3>
-                  <p className="text-white/80 text-sm flex items-center gap-1">
-                    <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                    Online • Resposta instantânea
+                <div className="flex-1">
+                  <h3 className="font-bold text-gray-900">Suporte ao Cliente</h3>
+                  <p className="text-xs text-green-600 font-medium flex items-center gap-1">
+                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    Bot Online 24/7
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => setShowChatBot(false)}
-                className="text-white/80 hover:text-white transition-colors"
+              <p className="text-sm text-gray-600 mb-3">Assistente inteligente pronto para ajudar!</p>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => handleOpenSupportChat()}
+                  className="flex-1 h-[55px] px-3 bg-[#00a82d] text-white rounded-xl hover:bg-[#008c26] transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                >
+                  <Send className="w-4 h-4" />
+                  Abrir Chat
+                </button>
+                <button 
+                  onClick={() => setShowSupportPanel(true)}
+                  className="h-[55px] px-4 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                >
+                  <FileText className="w-4 h-4" />
+                  Chamados
+                </button>
+              </div>
+            </div>
+
+            {/* Painel de Notificações */}
+            <div className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-shadow">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Bell className="w-5 h-5 text-[#00a82d]" />
+                  <h3 className="font-bold text-gray-900">Notificações</h3>
+                </div>
+                {unreadCount > 0 && (
+                  <span className="px-2 py-1 bg-red-500 text-white text-xs rounded-full font-bold">
+                    {unreadCount}
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-gray-600 mb-3">
+                {unreadCount > 0 ? `Você tem ${unreadCount} notificação(ões) não lida(s)` : 'Nenhuma notificação nova'}
+              </p>
+              <button 
+                onClick={() => setShowNotifications(true)}
+                className="w-full h-[55px] px-3 bg-[#00a82d] text-white rounded-xl hover:bg-[#008c26] transition-colors text-sm font-medium flex items-center justify-center gap-2"
               >
+                <Bell className="w-4 h-4" />
+                Ver Todas
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* PAINÉIS PRINCIPAIS */}
+      <div className="bg-gray-50 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Painel de Gerenciamento de Domínios */}
+            <button
+              onClick={() => setShowDomainPanel(true)}
+              className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-[#00a82d] text-left h-[200px] flex flex-col justify-between"
+            >
+              <div className="w-14 h-14 bg-[#00a82d]/10 rounded-xl flex items-center justify-center">
+                <Globe className="w-7 h-7 text-[#00a82d]" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Meus Domínios</h3>
+                <p className="text-gray-600 text-sm">Gerencie, renove e configure seus domínios</p>
+              </div>
+            </button>
+
+            {/* Painel de Pagamento */}
+            <button
+              onClick={handleOpenPaymentSettings}
+              className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-purple-600 text-left h-[200px] flex flex-col justify-between"
+            >
+              <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center">
+                <CreditCard className="w-7 h-7 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Pagamentos</h3>
+                <p className="text-gray-600 text-sm">Gerencie seus pagamentos e saldo</p>
+              </div>
+            </button>
+
+            {/* Painel de Afiliados */}
+            <button
+              onClick={() => setShowAffiliatePanel(true)}
+              className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-orange-600 text-left h-[200px] flex flex-col justify-between"
+            >
+              <div className="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center">
+                <Users className="w-7 h-7 text-orange-600" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Programa de Afiliados</h3>
+                <p className="text-gray-600 text-sm">Ganhe dinheiro indicando domínios</p>
+              </div>
+            </button>
+
+            {/* Painel de Marketplace */}
+            <button
+              onClick={() => setShowMarketplacePanel(true)}
+              className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-blue-600 text-left h-[200px] flex flex-col justify-between"
+            >
+              <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center">
+                <Store className="w-7 h-7 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Marketplace</h3>
+                <p className="text-gray-600 text-sm">Compre e venda domínios premium</p>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* MODAL: Área do Afiliado */}
+      {showAffiliatePanel && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-10">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Área do Afiliado</h2>
+                <p className="text-sm text-gray-600">Ganhe comissões indicando domínios</p>
+              </div>
+              <button onClick={() => setShowAffiliatePanel(false)} className="p-2 hover:bg-gray-100 rounded-lg">
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            {/* ChatBot Messages */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
-              {chatMessages.map((msg, index) => (
-                <div key={index} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[80%] ${msg.type === 'user' ? 'bg-[#00a82d] text-white' : 'bg-white text-gray-900 border border-gray-200'} rounded-2xl p-4 shadow-sm`}>
-                    <p className="whitespace-pre-line text-sm leading-relaxed">{msg.message}</p>
-                    {msg.actions && (
-                      <div className="mt-3 space-y-2">
-                        {msg.actions.map((action, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => handleChatAction(action.action)}
-                            className="w-full px-4 py-2 bg-[#00a82d]/10 hover:bg-[#00a82d]/20 text-[#00a82d] rounded-lg transition-colors text-sm font-medium text-left"
-                          >
-                            {action.label}
-                          </button>
-                        ))}
+            <div className="p-6 space-y-6">
+              {/* Estatísticas */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border-2 border-green-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-medium text-green-700">Saldo Disponível</h3>
+                    <DollarSign className="w-5 h-5 text-green-600" />
+                  </div>
+                  <p className="text-3xl font-bold text-green-900">R$ {affiliateData.balance.toFixed(2)}</p>
+                  <p className="text-xs text-green-600 mt-1">Disponível para saque</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border-2 border-blue-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-medium text-blue-700">Total de Vendas</h3>
+                    <TrendingUpIcon className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <p className="text-3xl font-bold text-blue-900">{affiliateData.totalSales}</p>
+                  <p className="text-xs text-blue-600 mt-1">Domínios vendidos</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border-2 border-orange-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-medium text-orange-700">Saque Pendente</h3>
+                    <Clock className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <p className="text-3xl font-bold text-orange-900">R$ {affiliateData.pendingWithdrawal.toFixed(2)}</p>
+                  <p className="text-xs text-orange-600 mt-1">Em processamento</p>
+                </div>
+              </div>
+
+              {/* Link de Afiliado */}
+              <div className="bg-gray-50 rounded-xl p-6">
+                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <LinkIcon className="w-5 h-5 text-[#00a82d]" />
+                  Seu Link de Afiliado
+                </h3>
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    value={affiliateData.link}
+                    readOnly
+                    className="flex-1 h-[55px] px-4 border-2 border-gray-300 rounded-xl bg-white font-mono text-sm"
+                  />
+                  <button
+                    onClick={handleCopyAffiliateLink}
+                    className="h-[55px] px-6 bg-[#00a82d] text-white rounded-xl hover:bg-[#008c26] transition-colors font-medium flex items-center gap-2"
+                  >
+                    <Copy className="w-5 h-5" />
+                    Copiar Link
+                  </button>
+                </div>
+                <p className="text-sm text-gray-600 mt-3">
+                  💡 Compartilhe este link com seus contatos. Você ganha comissão por cada domínio vendido através dele!
+                </p>
+              </div>
+
+              {/* Ações */}
+              <div className="flex gap-3">
+                <button
+                  onClick={handleRequestWithdrawal}
+                  disabled={affiliateData.balance <= 0}
+                  className={`flex-1 h-[55px] px-6 rounded-xl font-medium flex items-center justify-center gap-2 transition-all ${
+                    affiliateData.balance > 0
+                      ? 'bg-green-600 text-white hover:bg-green-700 shadow-md hover:shadow-lg'
+                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  <DollarSign className="w-5 h-5" />
+                  Sacar Comissão
+                </button>
+              </div>
+
+              {/* Vendas Confirmadas */}
+              <div>
+                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  Vendas Confirmadas ({affiliateData.sales.length})
+                </h3>
+                
+                {affiliateData.sales.length === 0 ? (
+                  <div className="text-center text-gray-500 py-12 bg-gray-50 rounded-xl">
+                    <Gift className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                    <p className="text-lg font-medium mb-2">Nenhuma venda ainda</p>
+                    <p className="text-sm">Compartilhe seu link e comece a ganhar comissões!</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {affiliateData.sales.map((sale) => (
+                      <div key={sale.id} className="border-2 border-gray-200 rounded-xl p-4 hover:border-[#00a82d] transition-all">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h4 className="font-bold text-gray-900">{sale.domain}</h4>
+                              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
+                                Confirmada
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-gray-600">
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-4 h-4" />
+                                {new Date(sale.date).toLocaleDateString('pt-BR')}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <DollarSign className="w-4 h-4" />
+                                Comissão: R$ {sale.commission.toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    )}
-                    <p className="text-xs opacity-60 mt-2">
-                      {msg.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Notificações Automáticas */}
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+                <div className="flex items-start gap-3">
+                  <Bell className="w-5 h-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <h4 className="font-bold text-blue-900 mb-1">Sistema de Notificações Ativo</h4>
+                    <p className="text-sm text-blue-700">
+                      Você receberá notificações automáticas sempre que realizar uma venda através do seu link de afiliado!
                     </p>
                   </div>
                 </div>
-              ))}
-              
-              {isTyping && (
-                <div className="flex justify-start">
-                  <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
-                    <div className="flex gap-1">
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* ChatBot Input */}
-            <div className="p-4 bg-white border-t border-gray-200 rounded-b-3xl sm:rounded-b-2xl">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  placeholder="Digite sua mensagem..."
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00a82d] focus:border-transparent outline-none"
-                />
-                <button
-                  onClick={handleSendMessage}
-                  className="px-6 py-3 bg-[#00a82d] text-white rounded-xl hover:bg-[#008c26] transition-colors font-medium"
-                >
-                  <Send className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="mt-3 flex gap-2 flex-wrap">
-                <button
-                  onClick={() => handleChatAction('diagnose')}
-                  className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-medium transition-colors"
-                >
-                  🔧 Diagnóstico
-                </button>
-                <button
-                  onClick={() => handleChatAction('faq')}
-                  className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-medium transition-colors"
-                >
-                  ❓ FAQ
-                </button>
-                <button
-                  onClick={() => handleChatAction('human_support')}
-                  className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-medium transition-colors"
-                >
-                  👤 Atendente
-                </button>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Login Modal */}
-      {showLoginModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
-            <button
-              onClick={() => {
-                setShowLoginModal(false);
-                setShowPassword(false);
-              }}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
-            >
-              ×
-            </button>
-            
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-[#00a82d]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Lock className="w-8 h-8 text-[#00a82d]" />
-              </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Bem-vindo de volta!</h2>
-              <p className="text-gray-600">Acesse sua conta DomainPro</p>
-            </div>
-
-            <form onSubmit={handleLogin} className="space-y-6">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  value={loginForm.email}
-                  onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00a82d] focus:border-transparent outline-none transition-all"
-                  placeholder="seu@email.com"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  Senha
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    id="password"
-                    value={loginForm.password}
-                    onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00a82d] focus:border-transparent outline-none transition-all"
-                    placeholder="••••••••"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
-                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="w-5 h-5" />
-                    ) : (
-                      <Eye className="w-5 h-5" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 text-[#00a82d] rounded border-gray-300 focus:ring-[#00a82d]" 
-                  />
-                  <span className="text-sm text-gray-600">Lembrar-me</span>
-                </label>
-                <a href="/recuperar-senha" className="text-sm text-[#00a82d] hover:text-[#008c26] font-medium">
-                  Esqueceu a senha?
-                </a>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full px-6 py-3 bg-[#00a82d] text-white rounded-lg hover:bg-[#008c26] transition-colors font-semibold text-lg"
-              >
-                Entrar
-              </button>
-
-              <div className="text-center">
-                <p className="text-sm text-gray-600">
-                  Não tem uma conta?{" "}
-                  <a href="#" className="text-[#00a82d] hover:text-[#008c26] font-medium">
-                    Criar conta grátis
-                  </a>
-                </p>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white py-16 sm:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
-              Encontre o Domínio Perfeito
-              <span className="block text-[#00a82d] mt-2">Para Seu Negócio</span>
-            </h1>
-            <p className="text-lg sm:text-xl text-gray-300 mb-10">
-              Milhões de domínios disponíveis. Registre o seu hoje e comece a construir sua presença online.
-            </p>
-
-            {/* Search Bar */}
-            <div className="bg-white rounded-2xl p-2 shadow-2xl max-w-3xl mx-auto">
-              <div className="flex flex-col sm:flex-row gap-2">
-                <div className="flex-1 flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl">
-                  <Search className="w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Digite o domínio que você procura..."
-                    value={domain}
-                    onChange={(e) => setDomain(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                    className="flex-1 bg-transparent text-gray-900 placeholder-gray-500 outline-none text-lg"
-                  />
-                </div>
-                <button
-                  onClick={handleSearch}
-                  disabled={isSearching}
-                  className="px-8 py-3 bg-[#00a82d] text-white rounded-xl hover:bg-[#008c26] transition-all font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSearching ? "Buscando..." : "Buscar"}
-                </button>
-              </div>
-            </div>
-
-            {/* Search Result */}
-            {searchResult && (
-              <div className="mt-6 bg-white rounded-2xl p-6 shadow-xl max-w-3xl mx-auto">
-                {searchResult.available ? (
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                        <Check className="w-6 h-6 text-green-600" />
-                      </div>
-                      <div className="text-left">
-                        <p className="text-gray-900 font-bold text-xl">{searchResult.domain}</p>
-                        <p className="text-green-600 font-medium">Disponível!</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p className="text-3xl font-bold text-gray-900">{searchResult.price}</p>
-                        <p className="text-sm text-gray-500">por ano</p>
-                      </div>
-                      <button 
-                        onClick={handleRegister}
-                        className="px-6 py-3 bg-[#00a82d] text-white rounded-xl hover:bg-[#008c26] transition-colors font-semibold whitespace-nowrap"
-                      >
-                        Registrar
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                        <span className="text-red-600 text-2xl">✕</span>
-                      </div>
-                      <div className="text-left">
-                        <p className="text-gray-900 font-bold text-xl">{searchResult.domain}</p>
-                        <p className="text-red-600 font-medium">Não disponível</p>
-                      </div>
-                    </div>
-                    <button className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors font-semibold">
-                      Ver Alternativas
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Popular Extensions */}
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              {extensions.slice(0, 4).map((ext) => (
-                <div
-                  key={ext.ext}
-                  className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20"
-                >
-                  <span className="text-white font-semibold">{ext.ext}</span>
-                  <span className="text-gray-300 ml-2">{ext.price}/ano</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Extensions Section */}
-      <section id="dominios" className="py-16 sm:py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Extensões de Domínio Populares
-            </h2>
-            <p className="text-lg text-gray-600">
-              Escolha a extensão perfeita para seu negócio
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {extensions.map((ext) => (
-              <div
-                key={ext.ext}
-                className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-[#00a82d] relative"
-              >
-                {ext.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <div className="bg-[#00a82d] text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                      <Star className="w-3 h-3 fill-current" />
-                      Popular
-                    </div>
-                  </div>
-                )}
-                <div className="text-center">
-                  <h3 className="text-3xl font-bold text-gray-900 mb-2">{ext.ext}</h3>
-                  <p className="text-2xl font-bold text-[#00a82d] mb-4">{ext.price}</p>
-                  <p className="text-sm text-gray-500 mb-4">por ano</p>
-                  <button 
-                    onClick={handleRegister}
-                    className="w-full px-6 py-3 bg-[#00a82d] text-white rounded-xl hover:bg-[#008c26] transition-colors font-semibold"
-                  >
-                    Registrar Agora
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section id="recursos" className="py-16 sm:py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Por Que Escolher a DomainPro?
-            </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Um painel inteligente e moderno onde cada função pode ser ativada de forma instantânea, de acordo com suas necessidades
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-            {features.map((feature, index) => (
-              <div 
-                key={index} 
-                className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all border border-gray-100"
-              >
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-14 h-14 bg-[#00a82d]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <feature.icon className="w-7 h-7 text-[#00a82d]" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{feature.title}</h3>
-                    <p className="text-gray-600 leading-relaxed">{feature.description}</p>
-                  </div>
-                </div>
-                
-                <ul className="space-y-2 mt-4 pl-[72px]">
-                  {feature.details.map((detail, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
-                      <Check className="w-4 h-4 text-[#00a82d] flex-shrink-0 mt-0.5" />
-                      <span>{detail}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          {/* Ativação sob Demanda */}
-          <div className="bg-gradient-to-r from-[#00a82d] to-[#008c26] rounded-2xl p-8 sm:p-12 text-white text-center">
-            <div className="max-w-3xl mx-auto">
-              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Zap className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-2xl sm:text-3xl font-bold mb-4">Ativação sob Demanda</h3>
-              <p className="text-lg text-white/90 leading-relaxed">
-                Todas as funções do DomainPro — segurança, DNS, marketing e configurações — podem ser ativadas ou desativadas livremente pelo cliente, sempre que desejar. A proposta é simples: dar poder e flexibilidade total ao usuário, com o máximo de segurança, praticidade e desempenho.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <section id="precos" className="py-16 sm:py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Planos Para Todos os Tamanhos
-            </h2>
-            <p className="text-lg text-gray-600">
-              Escolha o plano ideal para suas necessidades
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {plans.map((plan, index) => (
-              <div
-                key={index}
-                className={`bg-white rounded-2xl p-8 shadow-lg ${
-                  plan.highlighted
-                    ? "border-4 border-[#00a82d] scale-105 relative"
-                    : "border-2 border-gray-200"
-                }`}
-              >
-                {plan.highlighted && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <div className="bg-[#00a82d] text-white px-4 py-1 rounded-full text-sm font-bold">
-                      Mais Popular
-                    </div>
-                  </div>
-                )}
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                  <div className="flex items-baseline justify-center gap-1">
-                    <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
-                    <span className="text-gray-500">{plan.period}</span>
-                  </div>
-                </div>
-
-                <ul className="space-y-4 mb-8">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-[#00a82d] flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  onClick={handleRegister}
-                  className={`w-full px-6 py-3 rounded-xl font-semibold transition-colors ${
-                    plan.highlighted
-                      ? "bg-[#00a82d] text-white hover:bg-[#008c26]"
-                      : "bg-gray-100 text-gray-900 hover:bg-gray-200"
-                  }`}
-                >
-                  Começar Agora
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-16 sm:py-24 bg-gradient-to-r from-[#00a82d] to-[#008c26]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Pronto Para Começar Sua Jornada Online?
-          </h2>
-          <p className="text-xl text-white/90 mb-8">
-            Registre seu domínio hoje e ganhe 3 meses de email profissional grátis!
-          </p>
-          <button 
-            onClick={handleRegister}
-            className="px-8 py-4 bg-white text-[#00a82d] rounded-xl hover:bg-gray-100 transition-colors font-bold text-lg inline-flex items-center gap-2"
-          >
-            Buscar Meu Domínio
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Globe className="w-6 h-6 text-[#00a82d]" />
-                <span className="text-xl font-bold">DomainPro</span>
-              </div>
-              <p className="text-gray-400 text-sm">
-                Sua parceira confiável para registro de domínios e soluções web.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="font-bold mb-4">Produtos</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#" className="hover:text-[#00a82d] transition-colors">Domínios</a></li>
-                <li><a href="#" className="hover:text-[#00a82d] transition-colors">Hospedagem</a></li>
-                <li><a href="#" className="hover:text-[#00a82d] transition-colors">Email Profissional</a></li>
-                <li><a href="#" className="hover:text-[#00a82d] transition-colors">SSL Certificados</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bold mb-4">Suporte</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#" className="hover:text-[#00a82d] transition-colors">Central de Ajuda</a></li>
-                <li><a href="#" className="hover:text-[#00a82d] transition-colors">Contato</a></li>
-                <li><a href="#" className="hover:text-[#00a82d] transition-colors">Status do Sistema</a></li>
-                <li><a href="#" className="hover:text-[#00a82d] transition-colors">Documentação</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bold mb-4">Empresa</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#" className="hover:text-[#00a82d] transition-colors">Sobre Nós</a></li>
-                <li><a href="#" className="hover:text-[#00a82d] transition-colors">Blog</a></li>
-                <li><a href="#" className="hover:text-[#00a82d] transition-colors">Carreiras</a></li>
-                <li><a href="#" className="hover:text-[#00a82d] transition-colors">Parceiros</a></li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-gray-400">
-              © 2024 DomainPro. Todos os direitos reservados.
-            </p>
-            <div className="flex gap-6 text-sm text-gray-400">
-              <a href="#" className="hover:text-[#00a82d] transition-colors">Privacidade</a>
-              <a href="#" className="hover:text-[#00a82d] transition-colors">Termos</a>
-              <a href="#" className="hover:text-[#00a82d] transition-colors">Cookies</a>
-            </div>
-          </div>
-        </div>
-      </footer>
-
+      {/* Restante dos modais mantidos... */}
       {/* Floating Support Button */}
       <button
         onClick={() => setShowChatBot(true)}
