@@ -146,13 +146,26 @@ export default function Home() {
   // Marketplace Panel States
   const [showMarketplacePanel, setShowMarketplacePanel] = useState(false);
   const [marketplaceDomains, setMarketplaceDomains] = useState<Array<{
+    id: string;
     domain: string;
     price: number;
+    category: string;
     seller: string;
+    featured: boolean;
   }>>([
-    { domain: 'techstartup.com', price: 5000, seller: 'João Silva' },
-    { domain: 'lojaonline.com.br', price: 3500, seller: 'Maria Santos' }
+    { id: "MKT001", domain: "techstartup.com", price: 5000, category: "Tecnologia", seller: "João Silva", featured: true },
+    { id: "MKT002", domain: "lojaonline.com.br", price: 3500, category: "E-commerce", seller: "Maria Santos", featured: true },
+    { id: "MKT003", domain: "consultoria.com", price: 8000, category: "Negócios", seller: "Pedro Costa", featured: false },
+    { id: "MKT004", domain: "fitness.app", price: 4500, category: "Saúde", seller: "Ana Lima", featured: false },
+    { id: "MKT005", domain: "educacao.online", price: 6000, category: "Educação", seller: "Carlos Souza", featured: true },
+    { id: "MKT006", domain: "marketing.digital", price: 7500, category: "Marketing", seller: "Juliana Rocha", featured: false },
+    { id: "MKT007", domain: "investimentos.com.br", price: 12000, category: "Finanças", seller: "Roberto Alves", featured: true },
+    { id: "MKT008", domain: "design.studio", price: 5500, category: "Design", seller: "Fernanda Dias", featured: false },
+    { id: "MKT009", domain: "games.zone", price: 9000, category: "Entretenimento", seller: "Lucas Martins", featured: true },
+    { id: "MKT010", domain: "saude.online", price: 6500, category: "Saúde", seller: "Patricia Nunes", featured: false }
   ]);
+  const [selectedMarketplaceDomain, setSelectedMarketplaceDomain] = useState<any>(null);
+  const [showMarketplacePurchase, setShowMarketplacePurchase] = useState(false);
   
   // Payment Settings States
   const [showPaymentSettings, setShowPaymentSettings] = useState(false);
@@ -338,65 +351,20 @@ export default function Home() {
     }
   }, [showDomainPanel]);
 
-  // AFFILIATE FUNCTIONS
-  const handleCopyAffiliateLink = () => {
-    navigator.clipboard.writeText(affiliateData.link);
+  // DOMAIN MANAGEMENT FUNCTIONS
+  const handleOpenDomainPanel = () => {
+    setShowDomainPanel(true);
     
     const notification = {
       id: Date.now(),
-      message: "✅ Link copiado com sucesso!",
+      message: "✅ Painel de Gerenciamento de Domínios ativado com sucesso!",
       timestamp: new Date(),
       read: false,
       type: 'success' as const
     };
     setNotifications(prev => [notification, ...prev]);
-    
-    alert("✅ Link copiado com sucesso!\n\nCompartilhe com seus contatos e comece a ganhar comissões!");
   };
 
-  const handleRequestWithdrawal = async () => {
-    if (affiliateData.balance <= 0) {
-      alert("❌ Você não tem saldo disponível para saque.");
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/affiliate/withdrawal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: affiliateData.userId,
-          amount: affiliateData.balance
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setAffiliateData(prev => ({
-          ...prev,
-          pendingWithdrawal: prev.balance,
-          balance: 0
-        }));
-
-        const notification = {
-          id: Date.now(),
-          message: `✅ Saque solicitado com sucesso! Aguarde a confirmação. Valor: R$ ${affiliateData.balance.toFixed(2)}`,
-          timestamp: new Date(),
-          read: false,
-          type: 'success' as const
-        };
-        setNotifications(prev => [notification, ...prev]);
-
-        alert(`✅ Saque solicitado com sucesso!\n\nValor: R$ ${affiliateData.balance.toFixed(2)}\n\nAguarde a confirmação. O valor será transferido em até 2 dias úteis.`);
-      }
-    } catch (error) {
-      console.error('Erro ao solicitar saque:', error);
-      alert('❌ Erro ao solicitar saque. Tente novamente.');
-    }
-  };
-
-  // DOMAIN MANAGEMENT FUNCTIONS
   const handleRenewDomain = async (domainId: string) => {
     try {
       const response = await fetch('/api/domain/renew', {
@@ -568,6 +536,120 @@ export default function Home() {
     } catch (error) {
       console.error('Erro ao criar email:', error);
       alert('❌ Erro ao criar email profissional. Tente novamente.');
+    }
+  };
+
+  // AFFILIATE FUNCTIONS
+  const handleCopyAffiliateLink = () => {
+    navigator.clipboard.writeText(affiliateData.link);
+    
+    const notification = {
+      id: Date.now(),
+      message: "✅ Link copiado com sucesso!",
+      timestamp: new Date(),
+      read: false,
+      type: 'success' as const
+    };
+    setNotifications(prev => [notification, ...prev]);
+    
+    alert("✅ Link copiado com sucesso!\n\nCompartilhe com seus contatos e comece a ganhar comissões!");
+  };
+
+  const handleRequestWithdrawal = async () => {
+    if (affiliateData.balance <= 0) {
+      alert("❌ Você não tem saldo disponível para saque.");
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/affiliate/withdrawal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: affiliateData.userId,
+          amount: affiliateData.balance
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setAffiliateData(prev => ({
+          ...prev,
+          pendingWithdrawal: prev.balance,
+          balance: 0
+        }));
+
+        const notification = {
+          id: Date.now(),
+          message: `✅ Saque solicitado com sucesso! Aguarde a confirmação. Valor: R$ ${affiliateData.balance.toFixed(2)}`,
+          timestamp: new Date(),
+          read: false,
+          type: 'success' as const
+        };
+        setNotifications(prev => [notification, ...prev]);
+
+        alert(`✅ Saque solicitado com sucesso!\n\nValor: R$ ${affiliateData.balance.toFixed(2)}\n\nAguarde a confirmação. O valor será transferido em até 2 dias úteis.`);
+      }
+    } catch (error) {
+      console.error('Erro ao solicitar saque:', error);
+      alert('❌ Erro ao solicitar saque. Tente novamente.');
+    }
+  };
+
+  // MARKETPLACE FUNCTIONS
+  const handleOpenMarketplace = () => {
+    setShowMarketplacePanel(true);
+    
+    const notification = {
+      id: Date.now(),
+      message: "✅ Marketplace ativado! Explore domínios premium disponíveis para compra.",
+      timestamp: new Date(),
+      read: false,
+      type: 'success' as const
+    };
+    setNotifications(prev => [notification, ...prev]);
+  };
+
+  const handleViewMarketplaceDomain = (domain: any) => {
+    setSelectedMarketplaceDomain(domain);
+    setShowMarketplacePurchase(true);
+  };
+
+  const handlePurchaseMarketplaceDomain = async () => {
+    if (!selectedMarketplaceDomain) return;
+
+    try {
+      const response = await fetch('/api/marketplace/purchase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domainId: selectedMarketplaceDomain.id,
+          userId: 'user123',
+          price: selectedMarketplaceDomain.price
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        const notification = {
+          id: Date.now(),
+          message: `✅ Domínio ${selectedMarketplaceDomain.domain} comprado com sucesso! Valor: R$ ${selectedMarketplaceDomain.price.toFixed(2)}`,
+          timestamp: new Date(),
+          read: false,
+          type: 'success' as const
+        };
+        setNotifications(prev => [notification, ...prev]);
+
+        alert(`✅ Compra realizada com sucesso!\n\nDomínio: ${selectedMarketplaceDomain.domain}\nValor: R$ ${selectedMarketplaceDomain.price.toFixed(2)}\n\nO domínio foi adicionado à sua conta.`);
+        
+        setShowMarketplacePurchase(false);
+        setSelectedMarketplaceDomain(null);
+      }
+    } catch (error) {
+      console.error('Erro ao comprar domínio:', error);
+      alert('❌ Erro ao processar compra. Tente novamente.');
     }
   };
 
@@ -1594,7 +1676,7 @@ Gerado em: ${new Date().toLocaleString('pt-BR')}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Painel de Gerenciamento de Domínios */}
             <button
-              onClick={() => setShowDomainPanel(true)}
+              onClick={handleOpenDomainPanel}
               className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-[#00a82d] text-left h-[200px] flex flex-col justify-between"
             >
               <div className="w-14 h-14 bg-[#00a82d]/10 rounded-xl flex items-center justify-center">
@@ -1636,7 +1718,7 @@ Gerado em: ${new Date().toLocaleString('pt-BR')}
 
             {/* Painel de Marketplace */}
             <button
-              onClick={() => setShowMarketplacePanel(true)}
+              onClick={handleOpenMarketplace}
               className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-blue-600 text-left h-[200px] flex flex-col justify-between"
             >
               <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -1651,154 +1733,150 @@ Gerado em: ${new Date().toLocaleString('pt-BR')}
         </div>
       </div>
 
-      {/* MODAL: Área do Afiliado */}
-      {showAffiliatePanel && (
+      {/* MODAL: Marketplace */}
+      {showMarketplacePanel && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-10">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">Área do Afiliado</h2>
-                <p className="text-sm text-gray-600">Ganhe comissões indicando domínios</p>
+                <h2 className="text-2xl font-bold text-gray-900">Marketplace de Domínios Premium</h2>
+                <p className="text-sm text-gray-600">Explore e compre domínios premium disponíveis</p>
               </div>
-              <button onClick={() => setShowAffiliatePanel(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+              <button onClick={() => setShowMarketplacePanel(false)} className="p-2 hover:bg-gray-100 rounded-lg">
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            <div className="p-6 space-y-6">
-              {/* Estatísticas */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border-2 border-green-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium text-green-700">Saldo Disponível</h3>
-                    <DollarSign className="w-5 h-5 text-green-600" />
-                  </div>
-                  <p className="text-3xl font-bold text-green-900">R$ {affiliateData.balance.toFixed(2)}</p>
-                  <p className="text-xs text-green-600 mt-1">Disponível para saque</p>
-                </div>
-
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border-2 border-blue-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium text-blue-700">Total de Vendas</h3>
-                    <TrendingUpIcon className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <p className="text-3xl font-bold text-blue-900">{affiliateData.totalSales}</p>
-                  <p className="text-xs text-blue-600 mt-1">Domínios vendidos</p>
-                </div>
-
-                <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border-2 border-orange-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium text-orange-700">Saque Pendente</h3>
-                    <Clock className="w-5 h-5 text-orange-600" />
-                  </div>
-                  <p className="text-3xl font-bold text-orange-900">R$ {affiliateData.pendingWithdrawal.toFixed(2)}</p>
-                  <p className="text-xs text-orange-600 mt-1">Em processamento</p>
-                </div>
-              </div>
-
-              {/* Link de Afiliado */}
-              <div className="bg-gray-50 rounded-xl p-6">
-                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <LinkIcon className="w-5 h-5 text-[#00a82d]" />
-                  Seu Link de Afiliado
-                </h3>
-                <div className="flex gap-3">
-                  <input
-                    type="text"
-                    value={affiliateData.link}
-                    readOnly
-                    className="flex-1 h-[55px] px-4 border-2 border-gray-300 rounded-xl bg-white font-mono text-sm"
-                  />
-                  <button
-                    onClick={handleCopyAffiliateLink}
-                    className="h-[55px] px-6 bg-[#00a82d] text-white rounded-xl hover:bg-[#008c26] transition-colors font-medium flex items-center gap-2"
-                  >
-                    <Copy className="w-5 h-5" />
-                    Copiar Link
-                  </button>
-                </div>
-                <p className="text-sm text-gray-600 mt-3">
-                  💡 Compartilhe este link com seus contatos. Você ganha comissão por cada domínio vendido através dele!
-                </p>
-              </div>
-
-              {/* Ações */}
-              <div className="flex gap-3">
-                <button
-                  onClick={handleRequestWithdrawal}
-                  disabled={affiliateData.balance <= 0}
-                  className={`flex-1 h-[55px] px-6 rounded-xl font-medium flex items-center justify-center gap-2 transition-all ${
-                    affiliateData.balance > 0
-                      ? 'bg-green-600 text-white hover:bg-green-700 shadow-md hover:shadow-lg'
-                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  }`}
-                >
-                  <DollarSign className="w-5 h-5" />
-                  Sacar Comissão
+            <div className="p-6">
+              {/* Filtros */}
+              <div className="mb-6 flex gap-3 flex-wrap">
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium">
+                  Todos
+                </button>
+                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200">
+                  Tecnologia
+                </button>
+                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200">
+                  E-commerce
+                </button>
+                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200">
+                  Negócios
+                </button>
+                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200">
+                  Saúde
                 </button>
               </div>
 
-              {/* Vendas Confirmadas */}
-              <div>
-                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  Vendas Confirmadas ({affiliateData.sales.length})
-                </h3>
-                
-                {affiliateData.sales.length === 0 ? (
-                  <div className="text-center text-gray-500 py-12 bg-gray-50 rounded-xl">
-                    <Gift className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                    <p className="text-lg font-medium mb-2">Nenhuma venda ainda</p>
-                    <p className="text-sm">Compartilhe seu link e comece a ganhar comissões!</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {affiliateData.sales.map((sale) => (
-                      <div key={sale.id} className="border-2 border-gray-200 rounded-xl p-4 hover:border-[#00a82d] transition-all">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <h4 className="font-bold text-gray-900">{sale.domain}</h4>
-                              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
-                                Confirmada
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-4 text-sm text-gray-600">
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                {new Date(sale.date).toLocaleDateString('pt-BR')}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <DollarSign className="w-4 h-4" />
-                                Comissão: R$ {sale.commission.toFixed(2)}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
+              {/* Lista de Domínios */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {marketplaceDomains.map((domain) => (
+                  <div key={domain.id} className="border-2 border-gray-200 rounded-xl p-5 hover:border-blue-600 transition-all">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-gray-900 mb-1">{domain.domain}</h3>
+                        <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full font-medium">
+                          {domain.category}
+                        </span>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                      {domain.featured && (
+                        <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                      )}
+                    </div>
+                    
+                    <div className="mb-4">
+                      <p className="text-2xl font-bold text-blue-600">R$ {domain.price.toLocaleString('pt-BR')}</p>
+                      <p className="text-xs text-gray-600">Vendedor: {domain.seller}</p>
+                    </div>
 
-              {/* Notificações Automáticas */}
-              <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
-                <div className="flex items-start gap-3">
-                  <Bell className="w-5 h-5 text-blue-600 mt-0.5" />
-                  <div>
-                    <h4 className="font-bold text-blue-900 mb-1">Sistema de Notificações Ativo</h4>
-                    <p className="text-sm text-blue-700">
-                      Você receberá notificações automáticas sempre que realizar uma venda através do seu link de afiliado!
-                    </p>
+                    <button
+                      onClick={() => handleViewMarketplaceDomain(domain)}
+                      className="w-full h-[45px] bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                    >
+                      Ver Detalhes
+                    </button>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Restante dos modais mantidos... */}
+      {/* MODAL: Compra de Domínio do Marketplace */}
+      {showMarketplacePurchase && selectedMarketplaceDomain && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full">
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">{selectedMarketplaceDomain.domain}</h2>
+                <p className="text-sm text-gray-600">{selectedMarketplaceDomain.category}</p>
+              </div>
+              <button onClick={() => setShowMarketplacePurchase(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Informações do Domínio */}
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-sm text-blue-700 font-medium mb-1">Preço</p>
+                    <p className="text-3xl font-bold text-blue-900">R$ {selectedMarketplaceDomain.price.toLocaleString('pt-BR')}</p>
+                  </div>
+                  {selectedMarketplaceDomain.featured && (
+                    <div className="flex items-center gap-2 px-3 py-2 bg-yellow-100 rounded-lg">
+                      <Star className="w-5 h-5 text-yellow-600 fill-yellow-600" />
+                      <span className="text-sm font-bold text-yellow-700">Destaque</span>
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2 text-sm">
+                  <p className="text-blue-800"><strong>Vendedor:</strong> {selectedMarketplaceDomain.seller}</p>
+                  <p className="text-blue-800"><strong>Categoria:</strong> {selectedMarketplaceDomain.category}</p>
+                </div>
+              </div>
+
+              {/* Benefícios */}
+              <div className="space-y-3">
+                <h3 className="font-bold text-gray-900">O que está incluído:</h3>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-gray-700">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <span>Transferência completa do domínio</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-700">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <span>Suporte para migração</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-700">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <span>Garantia de 7 dias</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Ações */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowMarketplacePurchase(false)}
+                  className="flex-1 h-[55px] border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Voltar
+                </button>
+                <button
+                  onClick={handlePurchaseMarketplaceDomain}
+                  className="flex-1 h-[55px] bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2"
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                  Comprar Agora
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Floating Support Button */}
       <button
         onClick={() => setShowChatBot(true)}
